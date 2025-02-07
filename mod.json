@@ -1,0 +1,11 @@
+{
+    "name": "template",
+    "displayName": "Template",
+    "author": "Someone",
+    "description": "No description provided",
+    "version": "1.0",
+    "minGameVersion": 146,
+    "main": "template.Template",
+    "java": true,
+    "hideBrowser": true
+}
