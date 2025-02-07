@@ -2,7 +2,7 @@
 
 1. Clone repository.
    ```
-   git clone -b master --single-branch https://github.com/xstabux/...
+   git clone -b master --single-branch https://github.com/xstabux/https://github.com/stabu-dev/MindustryJavaModTemplate
    ```
 
 2. Pack sprites. (Only necessary if new sprites are added)
