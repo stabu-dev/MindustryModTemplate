@@ -31,14 +31,6 @@ import java.util.Map.Entry;
 
 /** @author GlennFolker */
 public class Annotations{
-    /** Indicates that this content belongs to a specific faction */
-    @Target(ElementType.FIELD)
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FactionDef{
-        /** @return The faction */
-        String value();
-    }
-
     /** Indicates that this content's entity type inherits interfaces */
     @Target({ElementType.FIELD, ElementType.TYPE})
     @Retention(RetentionPolicy.SOURCE)
