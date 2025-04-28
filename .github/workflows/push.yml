@@ -5,6 +5,8 @@ on: [push]
 jobs:
   buildJar:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # for Update bundles
 
     steps:
       - uses: actions/checkout@v4
