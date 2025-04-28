@@ -40,11 +40,11 @@ public class Template extends Mod{
             Events.on(ClientLoadEvent.class, e -> {
                 //show dialog upon startup
                 Time.runTask(10f, () -> {
-                    BaseDialog dialog = new BaseDialog("A Cat");
-                    dialog.cont.add("BEHOLD!").row();
+                    BaseDialog dialog = new BaseDialog("@cat");
+                    dialog.cont.add("@behold").row();
                     //mod sprites are prefixed with the mod name (this mod is called 'example' in its config)
                     dialog.cont.image(Core.atlas.find("template-cat")).pad(20f).row();
-                    dialog.cont.button("Cool, I ques?", dialog::hide).size(100f, 50f);
+                    dialog.cont.button("@cool", dialog::hide).size(100f, 50f);
                     dialog.show();
                 });
             });
