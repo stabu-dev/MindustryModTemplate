@@ -10,7 +10,7 @@ sourceSets.main{
     ]
 }
 
-sourceCompatibility = 16
+sourceCompatibility = 17
 targetCompatibility = 8
 
 dependencies{
@@ -148,6 +148,7 @@ task fetchComps{
                                         .replaceAll('@CallSuper\n*', '')
                                         .replaceAll('@Final\n*', '')
                                         .replaceAll('@EntityDef\\(*.*\\)*\n*', '')
+                                        .replaceAll('@MethodPriority\\(([^)]+)f\\)', '@MethodPriority($1)')
 
                                     if(content.isEmpty()) throw new IllegalStateException()
 
