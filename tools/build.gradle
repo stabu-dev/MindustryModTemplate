@@ -26,6 +26,7 @@ dependencies{
         implementation files(usedClasspath)
     }
 
+    implementation project(':annotations')
     implementation "com.github.Anuken.Arc:arc-core:$arcVersion"
     implementation "com.github.Anuken.Mindustry:core:$mindustryVersion"
 }
