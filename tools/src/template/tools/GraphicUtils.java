@@ -1,4 +1,4 @@
-package template.util;
+package template.tools;
 
 import arc.*;
 import arc.func.*;

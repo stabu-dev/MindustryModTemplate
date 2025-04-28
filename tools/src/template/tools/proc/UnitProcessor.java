@@ -12,7 +12,6 @@ import mindustry.type.UnitType;
 import template.gen.*;
 import template.tools.*;
 import template.tools.GenAtlas.*;
-import template.util.*;
 
 import java.util.concurrent.*;
 

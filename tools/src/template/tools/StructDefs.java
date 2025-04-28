@@ -1,4 +1,4 @@
-package template;
+package template.tools;
 
 import arc.graphics.*;
 import arc.math.geom.*;
