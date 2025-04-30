@@ -18,6 +18,15 @@ jobs:
           java-version: 17
           distribution: temurin
 
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK Platform 33 and Build Tools
+        run: |
+          # Погоджуємося з ліцензіями автоматично
+          yes | sdkmanager --licenses > /dev/null || true
+          sdkmanager "platforms;android-33" "build-tools;33.0.2"
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
