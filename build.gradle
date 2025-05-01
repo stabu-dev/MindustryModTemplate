@@ -8,7 +8,7 @@ buildscript{
 
     repositories{
         mavenCentral()
-        maven{ url "https://raw.githubusercontent.com/Zelaux/MindustryRepo/master/repository" }
+        maven{ url "https://maven.xpdustry.com/mindustry" }
         maven{ url 'https://jitpack.io' }
     }
 }
@@ -30,9 +30,6 @@ allprojects{
         spritesDir = new File(assetsDir, 'sprites/')
         spritesRawDir = new File(assetsRawDir, 'sprites/')
 
-        // `-Pmain.dev` will initiate a development build. Default is `false`.
-        devBuild = project.hasProperty('main.dev') && Boolean.parseBoolean(project.property('main.dev') as String)
-
         // `-Ptools.recompile` will force the :main project to recompile. Default is `false`.
         toolRecompile = project.hasProperty('tools.recompile') && Boolean.parseBoolean(project.property('tools.recompile') as String)
 
@@ -44,7 +41,7 @@ allprojects{
 
     repositories{
         mavenCentral()
-        maven{ url "https://raw.githubusercontent.com/Zelaux/MindustryRepo/master/repository" }
+        maven{ url "https://maven.xpdustry.com/mindustry" }
         maven{ url "https://jitpack.io" }
     }
 
@@ -90,6 +87,6 @@ allprojects{
 
     tasks.withType(Javadoc){
         options.addStringOption('Xdoclint:none', '-quiet')
-        options.addStringOption('-release', '16')
+        options.addStringOption('-release', '17')
     }
 }

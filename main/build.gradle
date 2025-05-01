@@ -54,10 +54,6 @@ task deploy(type: Jar, dependsOn: configurations.runtimeClasspath){
         include 'mod.json'
         include 'icon.png'
     }
-
-    doFirst{
-        println "Deploying ${devBuild ? 'dev' : 'user'} build."
-    }
 }
 
 task dex(type: Jar){
@@ -218,7 +214,6 @@ tasks.withType(Jar){
     exclude 'template/fetched/**'
     exclude 'template/entities/comp/**'
     exclude 'template/entities/merge/**'
-    if(!devBuild) exclude 'template/mod/DevBuildImpl*'
 
     exclude 'sprites/vanilla/**'
 }

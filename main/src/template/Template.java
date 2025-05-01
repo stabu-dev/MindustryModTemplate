@@ -3,10 +3,11 @@ package template;
 import arc.*;
 import arc.util.*;
 
+import mindustry.ctype.*;
 import mindustry.game.EventType.*;
 import mindustry.mod.*;
-
 import mindustry.ui.dialogs.*;
+
 import template.annotations.Annotations.*;
 import template.gen.*;
 
@@ -18,7 +19,6 @@ import static mindustry.Vars.*;
  */
 @LoadRegs("error") // Need this temporarily, so the class gets generated.
 public class Template extends Mod{
-    /** Whether the mod is in an asset-processing context. */
     public static boolean tools = false;
 
     /** Default constructor for Mindustry mod loader to instantiate. */
@@ -34,7 +34,6 @@ public class Template extends Mod{
         Template.tools = tools;
 
         if(!headless){
-            // Load assets once they're added into `Vars.tree`.
             Events.on(FileTreeInitEvent.class, e -> Core.app.post(TemplateSounds::load));
 
             Events.on(ClientLoadEvent.class, e -> {
@@ -66,5 +65,9 @@ public class Template extends Mod{
     public void loadContent(){
         //below has to be done after all things are loaded.
         TemplateEntityMapping.init();
+    }
+
+    public static boolean isTemplate(Content content){
+        return content.minfo.mod != null && content.minfo.mod.name.equals("template");
     }
 }
