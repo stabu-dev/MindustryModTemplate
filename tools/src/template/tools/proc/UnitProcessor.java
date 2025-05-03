@@ -29,16 +29,15 @@ import static template.tools.Tools.*;
  *     <li> Wreck regions ({@code -wreck}).</li>
  * </ul>
  * Checks if regions already exist before generating them. Outlines are generated internally but not saved separately.
- *
  * @author GlennFolker
  * @author Drullkus
  * @author Anuke
  * @author SK7725 (integration of outline/preview generation)
  * @author stabu_
  */
-public class UnitProcessor implements Processor {
+public class UnitProcessor implements Processor{
 
-    private static class DrawInstruction {
+    private static class DrawInstruction{
         Pixmap pixmap;
         float offsetX, offsetY;
         float layerOffset;
@@ -46,28 +45,28 @@ public class UnitProcessor implements Processor {
 
         Pixmap tempFlipped = null;
 
-        DrawInstruction(Pixmap pixmap, float offsetX, float offsetY, float layerOffset) {
+        DrawInstruction(Pixmap pixmap, float offsetX, float offsetY, float layerOffset){
             this.pixmap = pixmap;
             this.offsetX = offsetX;
             this.offsetY = offsetY;
             this.layerOffset = layerOffset;
         }
 
-        Rect bounds(Rect out) {
+        Rect bounds(Rect out){
             float w = pixmap.width / 2f;
             float h = pixmap.height / 2f;
             return out.set(offsetX - w, offsetY - h, pixmap.width, pixmap.height);
         }
 
-        void disposeTemporary() {
-            if (tempFlipped != null) {
+        void disposeTemporary(){
+            if(tempFlipped != null){
                 tempFlipped.dispose();
                 tempFlipped = null;
             }
         }
     }
 
-    private Pixmap tintCell(GenRegion region) {
+    private Pixmap tintCell(GenRegion region){
         Pixmap original = region.pixmap();
         Pixmap tinted = original.copy();
 
@@ -79,9 +78,9 @@ public class UnitProcessor implements Processor {
         tinted.each((x, y) -> {
             int currentColor = tinted.getRaw(x, y);
 
-            if (currentColor == whitePlaceholder) {
+            if(currentColor == whitePlaceholder){
                 tinted.set(x, y, targetColor1);
-            } else if (currentColor == grayPlaceholder) {
+            }else if(currentColor == grayPlaceholder){
                 tinted.set(x, y, targetColor2);
             }
         });
@@ -89,20 +88,20 @@ public class UnitProcessor implements Processor {
         return tinted;
     }
 
-    private GenRegion ensureRegion(String name, GenRegion relative, Prov<Pixmap> pixmapProvider) {
+    private GenRegion ensureRegion(String name, GenRegion relative, Prov<Pixmap> pixmapProvider){
         GenRegion existing = Tools.atlas.find(name);
-        if (existing.found()) {
+        if(existing.found()){
             return existing;
         }
 
         Pixmap pixmap = pixmapProvider.get();
-        if (pixmap == null) {
+        if(pixmap == null){
             Log.err("Pixmap provider returned null for @", name);
             return Tools.atlas.find(name);
         }
 
         String relativePath = "";
-        if (relative != null && relative.found()) {
+        if(relative != null && relative.found()){
             relativePath = relative.relativePath;
         }
 
@@ -113,17 +112,17 @@ public class UnitProcessor implements Processor {
         return Tools.atlas.find(name);
     }
 
-    private void ensureWreckRegion(String unitName, int index, Prov<Pixmap> pixmapProvider) {
+    private void ensureWreckRegion(String unitName, int index, Prov<Pixmap> pixmapProvider){
         String name = unitName + "-wreck" + index;
         String wreckPath = "rubble/";
 
         GenRegion existing = Tools.atlas.find(name);
-        if (existing.found()) {
+        if(existing.found()){
             return;
         }
 
         Pixmap pixmap = pixmapProvider.get();
-        if (pixmap == null) {
+        if(pixmap == null){
             Log.err("Pixmap provider returned null for wreck @", name);
             return;
         }
@@ -135,19 +134,19 @@ public class UnitProcessor implements Processor {
 
 
     @Override
-    public void process(ExecutorService exec) {
+    public void process(ExecutorService exec){
         content.units().each(Template::isTemplate, (UnitType type) -> submit(exec, type.name, () -> {
             Pixmap unitOutlinePixmap = null;
             Pixmap compositeIcon = null;
 
-            try {
+            try{
                 init(type);
                 load(type);
 
                 float scl = Draw.scl / 4f;
 
                 GenRegion unitBaseRegion = conv(type.region);
-                if (!unitBaseRegion.found()) {
+                if(!unitBaseRegion.found()){
                     Log.warn("Base region not found for unit: @. Skipping sprite generation.", type.name);
                     return;
                 }
@@ -156,11 +155,11 @@ public class UnitProcessor implements Processor {
 
                 ObjectMap<Weapon, GenRegion> weaponPreviews = new ObjectMap<>();
 
-                for (var weapon : type.weapons) {
+                for(var weapon : type.weapons){
                     weapon.load();
 
                     GenRegion weaponRegion = conv(weapon.region);
-                    if (!weaponRegion.found()) {
+                    if(!weaponRegion.found()){
                         continue;
                     }
                     final GenRegion finalWeaponRegion = weaponRegion;
@@ -168,7 +167,7 @@ public class UnitProcessor implements Processor {
                     GenRegion weaponPreviewRegion = ensureRegion(weapon.name + "-preview", weaponRegion, () -> {
                         Pixmap weaponOutlinePixmapInternal = null;
                         Pixmap previewPixmap;
-                        try {
+                        try{
                             weaponOutlinePixmapInternal = Pixmaps.outline(new PixmapRegion(finalWeaponRegion.pixmap()), type.outlineColor, type.outlineRadius);
 
                             int pWidth = Math.max(finalWeaponRegion.width, weaponOutlinePixmapInternal.width);
@@ -179,14 +178,14 @@ public class UnitProcessor implements Processor {
                             previewPixmap.draw(finalWeaponRegion.pixmap(), pWidth / 2 - finalWeaponRegion.width / 2, pHeight / 2 - finalWeaponRegion.height / 2, true);
 
                             GenRegion weaponCellRegion = conv(weapon.cellRegion);
-                            if (weaponCellRegion.found()) {
+                            if(weaponCellRegion.found()){
                                 Pixmap cell = tintCell(weaponCellRegion);
                                 previewPixmap.draw(cell, pWidth / 2 - cell.width / 2, pHeight / 2 - cell.height / 2, true);
                                 cell.dispose();
                             }
                             return previewPixmap;
-                        } finally {
-                            if (weaponOutlinePixmapInternal != null) {
+                        }finally{
+                            if(weaponOutlinePixmapInternal != null){
                                 weaponOutlinePixmapInternal.dispose();
                             }
                         }
@@ -199,19 +198,19 @@ public class UnitProcessor implements Processor {
                 Pixmap fullIconPixmap = null;
                 GenRegion fullRegion;
 
-                if (existingFull.found()) {
+                if(existingFull.found()){
                     fullRegion = existingFull;
-                    if (fullRegion.found()) fullIconPixmap = fullRegion.pixmap();
-                } else {
+                    if(fullRegion.found()) fullIconPixmap = fullRegion.pixmap();
+                }else{
                     Seq<DrawInstruction> instructions = new Seq<>();
                     Unit unit = type.constructor.get();
                     Pixmap tintedCell = null;
 
-                    if (unit instanceof Mechc) {
+                    if(unit instanceof Mechc){
                         GenRegion base = conv(type.baseRegion);
                         GenRegion leg = conv(type.legRegion);
-                        if (base.found()) instructions.add(new DrawInstruction(base.pixmap(), 0, 0, -2));
-                        if (leg.found()) {
+                        if(base.found()) instructions.add(new DrawInstruction(base.pixmap(), 0, 0, -2));
+                        if(leg.found()){
                             instructions.add(new DrawInstruction(leg.pixmap(), 0, 0, -1));
                             Pixmap flippedLeg = leg.pixmap().flipX();
                             DrawInstruction flippedInstr = new DrawInstruction(flippedLeg, 0, 0, -1);
@@ -222,46 +221,46 @@ public class UnitProcessor implements Processor {
 
                     type.weapons.select(w -> w.layerOffset < 0).each(weapon -> {
                         GenRegion preview = weaponPreviews.get(weapon);
-                        if (preview == null || !preview.found()) return;
+                        if(preview == null || !preview.found()) return;
                         Pixmap pix = preview.pixmap();
                         DrawInstruction instr = new DrawInstruction(pix, weapon.x / scl, -weapon.y / scl, weapon.layerOffset);
-                        if (weapon.flipSprite) {
+                        if(weapon.flipSprite){
                             instr.tempFlipped = pix.flipX();
                             instr.pixmap = instr.tempFlipped;
                         }
                         instructions.add(instr);
                     });
 
-                    if (unitOutlinePixmap != null) {
+                    if(unitOutlinePixmap != null){
                         DrawInstruction outlineInstr = new DrawInstruction(unitOutlinePixmap, 0, 0, -0.1f);
                         outlineInstr.blend = false;
                         instructions.add(outlineInstr);
                     }
-                    if (unitBaseRegion.found()) {
+                    if(unitBaseRegion.found()){
                         instructions.add(new DrawInstruction(unitBaseRegion.pixmap(), 0, 0, 0f));
                     }
 
                     GenRegion cellRegion = conv(type.cellRegion);
-                    if (cellRegion.found()) {
+                    if(cellRegion.found()){
                         tintedCell = tintCell(cellRegion);
                         instructions.add(new DrawInstruction(tintedCell, 0, 0, 0.1f));
                     }
 
                     type.weapons.select(w -> w.layerOffset >= 0).each(weapon -> {
                         GenRegion preview = weaponPreviews.get(weapon);
-                        if (preview == null || !preview.found()) return;
+                        if(preview == null || !preview.found()) return;
                         Pixmap pix = preview.pixmap();
                         DrawInstruction instr = new DrawInstruction(pix, weapon.x / scl, -weapon.y / scl, weapon.layerOffset);
-                        if (weapon.flipSprite) {
+                        if(weapon.flipSprite){
                             instr.tempFlipped = pix.flipX();
                             instr.pixmap = instr.tempFlipped;
                         }
                         instructions.add(instr);
                     });
 
-                    if (instructions.isEmpty()) {
+                    if(instructions.isEmpty()){
                         Log.warn("No parts to draw for unit: @. Skipping -full generation.", type.name);
-                        if (tintedCell != null) tintedCell.dispose();
+                        if(tintedCell != null) tintedCell.dispose();
                         instructions.each(DrawInstruction::disposeTemporary);
                         return;
                     }
@@ -271,9 +270,9 @@ public class UnitProcessor implements Processor {
                     Rect bounds = Tmp.r1.set(0, 0, 0, 0);
                     Rect totalBounds = Tmp.r2.set(0, 0, 0, 0);
                     boolean first = true;
-                    for (DrawInstruction instr : instructions) {
-                        if (first) { totalBounds.set(instr.bounds(bounds)); first = false; }
-                        else { totalBounds.merge(instr.bounds(bounds)); }
+                    for(DrawInstruction instr : instructions){
+                        if(first){ totalBounds.set(instr.bounds(bounds)); first = false; }
+                        else{ totalBounds.merge(instr.bounds(bounds)); }
                     }
 
                     int finalWidth = Math.max(1, Mathf.ceil(totalBounds.width));
@@ -282,7 +281,7 @@ public class UnitProcessor implements Processor {
 
                     float originX = -totalBounds.x;
                     float originY = -totalBounds.y;
-                    for (DrawInstruction instr : instructions) {
+                    for(DrawInstruction instr : instructions){
                         Pixmap pix = instr.pixmap;
                         int drawX = Mathf.floor(originX + instr.offsetX - pix.width / 2f);
                         int drawY = Mathf.floor(originY + instr.offsetY - pix.height / 2f);
@@ -290,7 +289,7 @@ public class UnitProcessor implements Processor {
                         instr.disposeTemporary();
                     }
 
-                    if (tintedCell != null) {
+                    if(tintedCell != null){
                         tintedCell.dispose();
                     }
 
@@ -298,10 +297,10 @@ public class UnitProcessor implements Processor {
                     fullRegion.relativePath = unitBaseRegion.relativePath;
                     fullRegion.save(true);
 
-                    if (fullRegion.found()) fullIconPixmap = fullRegion.pixmap();
+                    if(fullRegion.found()) fullIconPixmap = fullRegion.pixmap();
                 }
 
-                if (type.health > 0 && fullIconPixmap != null) {
+                if(type.health > 0 && fullIconPixmap != null){
                     Rand rand = new Rand();
                     rand.setSeed(type.name.hashCode());
                     int splits = 3;
@@ -311,20 +310,20 @@ public class UnitProcessor implements Processor {
                     VoronoiNoise voronoi = new VoronoiNoise(type.id, true);
 
                     final Pixmap sourcePixmapForWrecks = fullIconPixmap;
-                    for (int i = 0; i < splits; i++) {
+                    for(int i = 0; i < splits; i++){
                         int finalI = i;
                         ensureWreckRegion(type.name, finalI + 1, () -> {
                             Pixmap wreckPixmap = new Pixmap(sourcePixmapForWrecks.width, sourcePixmapForWrecks.height);
                             sourcePixmapForWrecks.each((x, y) -> {
                                 int rawColor = sourcePixmapForWrecks.getRaw(x, y);
-                                if ((rawColor & 0xff) == 0) return;
-                                if (voronoi.noise(x, y, 1f / (14f + sourcePixmapForWrecks.width / 40f)) <= 0.47d) {
+                                if((rawColor & 0xff) == 0) return;
+                                if(voronoi.noise(x, y, 1f / (14f + sourcePixmapForWrecks.width / 40f)) <= 0.47d){
                                     boolean darken = Math.max(Ridged.noise2d(1, x, y, 3, 1f / (20f + sourcePixmapForWrecks.width / 8f)), 0) > 0.16f;
                                     float dst = offset.dst(x, y);
-                                    float noise = (float) Noise.rawNoise(dst / (9f + sourcePixmapForWrecks.width / 70f)) * (60 + sourcePixmapForWrecks.width / 30f);
-                                    int wreckIndex = (int) Mathf.clamp(Mathf.mod(offset.angleTo(x, y) + noise + degrees, 360f) / 360f * splits, 0, splits - 1);
+                                    float noise = (float)Noise.rawNoise(dst / (9f + sourcePixmapForWrecks.width / 70f)) * (60 + sourcePixmapForWrecks.width / 30f);
+                                    int wreckIndex = (int)Mathf.clamp(Mathf.mod(offset.angleTo(x, y) + noise + degrees, 360f) / 360f * splits, 0, splits - 1);
 
-                                    if (wreckIndex == finalI) {
+                                    if(wreckIndex == finalI){
                                         wreckPixmap.setRaw(x, y, Color.muli(rawColor, darken ? 0.7f : 1f));
                                     }
                                 }
@@ -332,18 +331,18 @@ public class UnitProcessor implements Processor {
                             return wreckPixmap;
                         });
                     }
-                } else if (fullIconPixmap == null && type.health > 0) {
+                }else if(fullIconPixmap == null && type.health > 0){
                     Log.warn("Cannot generate wrecks for @ because full icon pixmap is missing.", type.name);
                 }
 
-            } catch (Exception e) {
+            }catch(Exception e){
                 Log.err("Failed to process sprites for unit: " + type.name, e);
-            } finally {
-                if (unitOutlinePixmap != null) {
+            }finally{
+                if(unitOutlinePixmap != null){
                     unitOutlinePixmap.dispose();
                 }
 
-                if (compositeIcon != null) {
+                if(compositeIcon != null){
                     compositeIcon.dispose();
                 }
             }
