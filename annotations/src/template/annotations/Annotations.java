@@ -56,11 +56,6 @@ public class Annotations{
         Class<?> value() default Void.class;
     }
 
-    /** Whether this class is the base class for faction enum. Only one type may use this */
-    @Target(ElementType.TYPE)
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FactionBase{}
-
     /** Works somewhat like {@code Object.assign(...)} for Block and Building */
     @Target({ElementType.TYPE, ElementType.FIELD})
     @Retention(RetentionPolicy.SOURCE)
@@ -114,15 +109,9 @@ public class Annotations{
     /** Indicates that {@link Dupe} should replace the method completely */
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.SOURCE)
-    public @interface Actually{
+    public @interface OverrideImpl{
         /** @return The replacement */
         String value() default "";
-    }
-
-    @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface SuperIdol{
-        String value();
     }
 
     /** Indicates that this class is an entity component */

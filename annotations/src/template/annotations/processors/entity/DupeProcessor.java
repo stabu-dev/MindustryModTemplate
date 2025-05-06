@@ -108,7 +108,7 @@ public class DupeProcessor extends BaseProcessor{
             if(is(m, Modifier.ABSTRACT, Modifier.NATIVE)) continue;
 
             //parse @Actually and replace all occurences of baseClass and baseBuild with the new ones
-            methodBlocks.put(descString(m) + (isBuild ? "BUILD" : ""), annotation(m, Actually.class) != null ? annotation(m, Actually.class).value() : procBlock(trees.getTree(m).getBody().toString()).replaceAll(
+            methodBlocks.put(descString(m) + (isBuild ? "BUILD" : ""), annotation(m, OverrideImpl.class) != null ? annotation(m, OverrideImpl.class).value() : procBlock(trees.getTree(m).getBody().toString()).replaceAll(
                     "(?<=^|\\W)"+simpleName(baseClass)+"(?=\\W|$)", rawName
             ).replaceAll(
                     "(?<=^|\\W)"+simpleName(baseClass)+"Build(?=\\W|$)", rawName+"Build"
@@ -233,7 +233,7 @@ public class DupeProcessor extends BaseProcessor{
 
             boolean isPrivate = is(first, Modifier.PRIVATE);
             MethodSpec.Builder mbuilder = MethodSpec.methodBuilder(simpleName(first)).addModifiers(isPrivate ? Modifier.PRIVATE : Modifier.PUBLIC);
-            mbuilder.addAnnotations(Seq.with(first.getAnnotationMirrors()).map(AnnotationSpec::get).removeAll(a -> a.type.equals(tName(Actually.class))));
+            mbuilder.addAnnotations(Seq.with(first.getAnnotationMirrors()).map(AnnotationSpec::get).removeAll(a -> a.type.equals(tName(OverrideImpl.class))));
 
             if(is(first, Modifier.STATIC)) mbuilder.addModifiers(Modifier.STATIC);
             mbuilder.addTypeVariables(Seq.with(first.getTypeParameters()).map(TypeVariableName::get));
