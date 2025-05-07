@@ -1,7 +1,5 @@
 package template.annotations.processors.impl;
 
-import arc.*;
-import arc.assets.loaders.SoundLoader.*;
 import arc.audio.*;
 import arc.files.*;
 import arc.struct.*;
@@ -28,7 +26,6 @@ public class AssetsProcessor extends BaseProcessor{
     public void process(RoundEnvironment roundEnv) throws Exception{
         if(round == 1){
             assets.clear().addAll(
-                // Sounds
                 new Asset(){
                     @Override
                     public TypeElement type(){
@@ -52,15 +49,33 @@ public class AssetsProcessor extends BaseProcessor{
 
                     @Override
                     public void load(MethodSpec.Builder builder){
-                        builder.addStatement("var n = $S + name", directory() + "/")
-                            .addStatement("var path = $T.tree.get(n + $S).exists() ? n + $S : n + $S", cName(Vars.class), ".ogg", ".ogg", ".mp3")
-                            .addCode(lnew())
-                            .addStatement("var sound = new $T()", cName(Sound.class))
-                            .addCode(lnew())
-                            .addStatement("var desc = $T.assets.load(path, $T.class, new $T(sound))", cName(Core.class), cName(Sound.class), cName(SoundParameter.class))
-                            .addStatement("desc.errored = e -> $T.err(($T)e)", cName(Log.class), cName(Throwable.class))
-                            .addCode(lnew())
-                            .addStatement("return sound");
+                        builder.addStatement("return $T.tree.loadSound($S + name)", cName(Vars.class), directory() + "/");
+                    }
+                },
+                new Asset(){
+                    @Override
+                    public TypeElement type(){
+                        return toType(Music.class);
+                    }
+
+                    @Override
+                    public String directory(){
+                        return "music";
+                    }
+
+                    @Override
+                    public String name(){
+                        return "TemplateMusics";
+                    }
+
+                    @Override
+                    public boolean valid(Fi file){
+                        return file.extEquals("ogg") || file.extEquals("mp3");
+                    }
+
+                    @Override
+                    public void load(MethodSpec.Builder builder){
+                        builder.addStatement("return $T.tree.loadMusic($S + name)", cName(Vars.class), directory() + "/");
                     }
                 }
             );
@@ -89,20 +104,32 @@ public class AssetsProcessor extends BaseProcessor{
                 boolean useProp = a.properties();
 
                 Fi propFile = rootDir.child("main/assets/" + a.directory() + "/" + a.propertyFile());
-                Log.info("Asset:"+"main/assets/" + a.directory() + "/" + a.propertyFile());
+                Log.info("Asset properties file path: "+"main/assets/" + a.directory() + "/" + a.propertyFile());
                 ObjectMap<String, String> temp = null;
-                if(useProp) PropertiesUtils.load(temp = new ObjectMap<>(), propFile.reader());
+                if(useProp && propFile.exists()) {
+                    PropertiesUtils.load(temp = new ObjectMap<>(), propFile.reader());
+                } else if (useProp && !propFile.exists()) {
+                    Log.warn("Property file not found: @", propFile.path());
+                }
 
-                ObjectMap<String, String> properties = temp; // Implicitly final, for use in lambda statements
+                ObjectMap<String, String> properties = temp;
 
                 String dir = "main/assets/" + a.directory();
                 rootDir.child(dir).walk(path -> {
-                    if((a.properties() && path.equals(propFile)) || !a.valid(path)) return;
+                    if(path.isDirectory() || (a.properties() && path.equals(propFile)) || !a.valid(path)) return;
 
                     String p = path.absolutePath();
-                    String name = p.substring(p.lastIndexOf(dir) + dir.length() + 1);
+                    String relativePathFromAssetDir;
+                    String dirAbsolutePath = rootDir.child(dir).absolutePath();
+
+                    if (p.startsWith(dirAbsolutePath)) {
+                        relativePathFromAssetDir = p.substring(dirAbsolutePath.length() + (p.charAt(dirAbsolutePath.length()) == '/' || p.charAt(dirAbsolutePath.length()) == '\\' ? 1 : 0) );
+                    } else {
+                        relativePathFromAssetDir = path.name();
+                    }
+
                     String fieldName = Strings.kebabToCamel(path.nameWithoutExtension());
-                    int ex = path.extension().length() + 1;
+                    String stripped = relativePathFromAssetDir.substring(0, relativePathFromAssetDir.length() - (path.extension().length() + 1));
 
                     spec.addField(
                         FieldSpec.builder(tName(type), fieldName)
@@ -111,13 +138,15 @@ public class AssetsProcessor extends BaseProcessor{
                         .build()
                     );
 
-                    String stripped = name.substring(0, name.length() - ex);
                     globalLoad.addStatement("$L = load($S)", fieldName, stripped);
 
-                    if(a.properties()){
-                        Seq<String> props = properties.keys().toSeq().select(prop -> prop.split("\\.")[1].equals(stripped));
+                    if(a.properties() && properties != null){
+                        Seq<String> props = properties.keys().toSeq().select(propKey -> propKey.startsWith(stripped + "."));
                         for(String prop : props){
-                            String field = prop.split("\\.")[2];
+                            String[] parts = prop.split("\\.", 2);
+                            if (parts.length < 2) continue;
+
+                            String field = prop.substring(stripped.length() + 1);
                             String val = properties.get(prop);
 
                             if(!val.startsWith("[")){
@@ -126,7 +155,12 @@ public class AssetsProcessor extends BaseProcessor{
                                 Seq<String> rawargs = Seq.with(val.substring(1, val.length() - 1).split("\\s*,\\s*"));
                                 String format = rawargs.remove(0);
 
-                                Seq<Object> args = rawargs.map(elements::getTypeElement);
+                                Seq<Object> args = rawargs.map(arg -> {
+                                    if (arg.matches("-?\\d+")) return Integer.parseInt(arg);
+                                    if (arg.matches("-?\\d*\\.\\d+([eE][-+]?\\d+)?")) return Float.parseFloat(arg);
+                                    if (arg.equalsIgnoreCase("true") || arg.equalsIgnoreCase("false")) return Boolean.parseBoolean(arg);
+                                    return arg;
+                                });
                                 args.insert(0, fieldName);
                                 args.insert(1, field);
 
@@ -146,7 +180,7 @@ public class AssetsProcessor extends BaseProcessor{
         /** @return The type of the asset */
         TypeElement type();
 
-        /** @return The asset directory, must not be surrounded with {@code /} */
+        /** @return The asset directory must not be surrounded with {@code /} */
         String directory();
 
         /** @return The class name */
@@ -171,8 +205,9 @@ public class AssetsProcessor extends BaseProcessor{
         /** Method builder for asset loading */
         void load(MethodSpec.Builder builder);
 
+        /** Default initializer for the static asset fields before they are loaded. */
         default CodeBlock initializer(){
-            return CodeBlock.builder().addStatement("new $T()", tName(type())).build();
+            return CodeBlock.builder().add("new $T()", tName(type())).build();
         }
     }
 }
