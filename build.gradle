@@ -29,6 +29,7 @@ allprojects{
         assetsRawDir = new File(project(':main').projectDir, 'assets-raw/')
         spritesDir = new File(assetsDir, 'sprites/')
         spritesRawDir = new File(assetsRawDir, 'sprites/')
+        mindustryPath = project.hasProperty('mindustryPath') ? project.property('mindustryPath') : null
 
         // `-Ptools.recompile` will force the :main project to recompile. Default is `false`.
         toolRecompile = project.hasProperty('tools.recompile') && Boolean.parseBoolean(project.property('tools.recompile') as String)
@@ -88,5 +89,44 @@ allprojects{
     tasks.withType(Javadoc){
         options.addStringOption('Xdoclint:none', '-quiet')
         options.addStringOption('-release', '17')
+    }
+}
+
+import arc.files.Fi
+import arc.util.OS
+
+tasks.register('install', DefaultTask) {
+
+    final def mainProj = project(':main')
+    final def deployJarProvider = mainProj.tasks.named('deploy', Jar).flatMap { it.archiveFile }
+    final def mindustryPathProp = project.providers.gradleProperty('mindustryPath')
+
+    inputs.file(deployJarProvider)
+            .withPathSensitivity(PathSensitivity.ABSOLUTE)
+    inputs.property("mindustryPathPropValue", mindustryPathProp.orElse(""))
+
+    dependsOn(mainProj.tasks.named('deploy'))
+
+    doLast {
+        File jarFile = deployJarProvider.get().asFile
+        String customPath = mindustryPathProp.getOrNull()
+        def modsDir
+
+        if (customPath && !customPath.trim().isEmpty()) {
+            modsDir = Fi.get(customPath)
+        } else {
+            modsDir = Fi.get(OS.getAppDataDirectoryString("Mindustry")).child("mods")
+        }
+
+        modsDir.mkdirs()
+
+        File existingJar = modsDir.child(jarFile.name).file()
+        if (existingJar.exists()) {
+            existingJar.delete()
+        }
+
+        Fi.get(jarFile as String).copyTo(modsDir)
+
+        logger.lifecycle("Сopied '${jarFile.name}' to '${modsDir.path()}'.")
     }
 }
