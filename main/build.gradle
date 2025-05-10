@@ -31,11 +31,11 @@ ext{
 
 import arc.files.*
 import arc.func.*
-import arc.struct.*
 import arc.util.*
 import arc.util.serialization.*
 
 import java.util.concurrent.*
+import java.util.concurrent.atomic.*
 
 task deploy(type: Jar, dependsOn: configurations.runtimeClasspath){
     if(!spritesDir.exists()){
@@ -115,27 +115,59 @@ class Fetcher{
 
 task fetchComps{
     doFirst{
-        delete{ delete fetchDir }
-        fetchDir.mkdir()
+        fetchDir.mkdirs()
 
-        final CopyOnWriteArrayList<Fetcher> fetches = new CopyOnWriteArrayList<>()
+        final List<Map<String, String>> componentsToDownload = []
 
-        UnsafeRunnable mainRun ={
+        println "Fetching component list from GitHub API..."
+        try {
             Http.get("https://api.github.com/repos/Anuken/Mindustry/contents/core/src/mindustry/entities/comp?ref=$mindustryFetchVersion")
-                .error({ final t -> throw new RuntimeException(t) })
-                .block({ final res ->
-                    final def list = Jval.read(res.getResultAsString()).asArray()
-                    println "Found $list.size entity components."
+                    .error({ final t -> throw new RuntimeException("Failed to list components from GitHub API. URL: https://api.github.com/repos/Anuken/Mindustry/contents/core/src/mindustry/entities/comp?ref=$mindustryFetchVersion", t) })
+                    .block({ final res ->
+                        final def list = Jval.read(res.getResultAsString()).asArray()
+                        println "API returned ${list.size()} potential entity components."
 
-                    for(final Jval val : list){
-                        final def filename = val.get('name').asString()
-                        final def fileurl = val.get('download_url').asString()
+                        for(final Jval val : list){
+                            final def filename = val.get('name').asString()
+                            final def fileurl = val.get('download_url').asString()
 
-                        final UnsafeRunnable run ={
-                            Http.get(fileurl)
-                                .error({ final t -> throw new RuntimeException(t) })
-                                .block({ final comp ->
-                                    final def content = comp.getResultAsString()
+                            if (Fi.get("$fetchDir/$filename").exists()) {
+                                println "Already Fetched: $filename. Run cleanFetched to re-fetch."
+                            } else {
+                                componentsToDownload.add([name: filename, url: fileurl])
+                            }
+                        }
+                    })
+        } catch (Exception e) {
+            Log.err("Error during GitHub API call to list components:", e)
+            throw new GradleException("Could not retrieve component list from GitHub.", e)
+        }
+
+
+        if (componentsToDownload.isEmpty()) {
+            println "No new components to fetch (all existing or API returned empty list)."
+            fetchTemp.text = "$mindustryVersion/$fetchRevision"
+            return
+        }
+
+        println "Attempting to fetch ${componentsToDownload.size()} new components."
+
+        int numThreads = Math.min(componentsToDownload.size(), 8)
+        if (numThreads <= 0 && componentsToDownload.size() > 0) numThreads = 1
+
+        ExecutorService executor = Executors.newFixedThreadPool(numThreads)
+        List<Future<?>> futures = new ArrayList<>()
+        final AtomicInteger SucceededCount = new AtomicInteger(0)
+        final AtomicInteger FailedCount = new AtomicInteger(0)
+
+        for (final Map<String, String> compInfo : componentsToDownload) {
+            futures.add(executor.submit({
+                try {
+                    println "Fetching ${compInfo.name} from ${compInfo.url}"
+                    Http.get(compInfo.url)
+                            .error({ final t -> throw new RuntimeException("HTTP error downloading ${compInfo.name} from ${compInfo.url}", t) })
+                            .block({ final compRes ->
+                                String content = compRes.getResultAsString()
                                         .replace('mindustry.entities.comp', fetchPackage.replace('/', '.'))
                                         .replace('mindustry.annotations.Annotations.*', 'template.annotations.Annotations.*')
                                         .replaceAll('@Component\\((base = true|.)+\\)\n*', '@EntityComponent(base = true, write = false)\n')
@@ -146,39 +178,71 @@ task fetchComps{
                                         .replaceAll('@EntityDef\\(*.*\\)*\n*', '')
                                         .replaceAll('@MethodPriority\\(([^)]+)f\\)', '@MethodPriority($1)')
 
-                                    if(content.isEmpty()) throw new IllegalStateException()
+                                if(content.isEmpty()) throw new IllegalStateException("Content for ${compInfo.name} became empty after processing.")
 
-                                    final def fi = Fi.get("$fetchDir/$filename")
-                                    fi.writeString(content, false)
-                                })
-                        }
-
-                        fetches.add(new Fetcher(run: run))
-                    }
-                })
+                                final def fi = Fi.get("$fetchDir/${compInfo.name}")
+                                fi.writeString(content, false)
+                                SucceededCount.incrementAndGet()
+                                println "Successfully fetched and processed: ${compInfo.name}"
+                            })
+                } catch (Throwable t) {
+                    FailedCount.incrementAndGet()
+                    Log.err("Failed to fetch/process component ${compInfo.name}:", t)
+                    throw t
+                }
+            } as Runnable))
         }
 
-        new Fetcher(run: mainRun).execute()
+        executor.shutdown()
 
-        final def found = fetches.size()
-
-        Seq<Thread> threads = Seq.with(fetches).map({ final Fetcher fetch -> new Thread({
-            fetch.execute()
-            synchronized(fetches){
-                fetches.remove(fetch)
-                print '\b'
+        List<Throwable> exceptions = []
+        for (Future<?> future : futures) {
+            try {
+                future.get(2, TimeUnit.MINUTES)
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt()
+                exceptions.add(new RuntimeException("Fetching was interrupted for one component.", e))
+            } catch (ExecutionException e) {
+                exceptions.add(e.getCause() != null ? e.getCause() : e)
+            } catch (TimeoutException e) {
+                exceptions.add(new RuntimeException("Fetching timed out for one component.", e))
             }
-        }) })
+        }
 
-        threads.each(Thread::start)
-        while(!fetches.isEmpty()) Thread.currentThread().yield()
+        try {
+            if (!executor.awaitTermination(30, TimeUnit.SECONDS)) {
+                Log.warn("Fetcher executor did not terminate in 30 seconds, attempting forceful shutdown.")
+                executor.shutdownNow()
+                if (!executor.awaitTermination(30, TimeUnit.SECONDS)) {
+                    Log.err("Fetcher executor did not terminate even after forceful shutdown.")
+                }
+            }
+        } catch (InterruptedException ignored) {
+            executor.shutdownNow()
+            Thread.currentThread().interrupt()
+        }
+
+        println "Fetching complete. Succeeded: ${SucceededCount.get()}, Failed: ${FailedCount.get()} (out of ${componentsToDownload.size()} new components attempted)."
+
+        if (!exceptions.isEmpty()) {
+            println "Encountered ${exceptions.size()} errors during fetch operations:"
+            exceptions.eachWithIndex { Throwable e, int i ->
+                Log.err("Error ${i + 1}:", e)
+            }
+            throw new GradleException("Failed to fetch all components. ${exceptions.size()} errors occurred. Check logs.")
+        }
+
+        if (FailedCount.get() > 0) {
+            throw new GradleException("Failed to fetch ${FailedCount.get()} components. Check logs.")
+        }
 
         fetchTemp.text = "$mindustryVersion/$fetchRevision"
-        println "Wrote $found entity components."
+        println "Wrote ${SucceededCount.get()} new entity components."
     }
 }
 
 task cleanFetched(type: Delete){
+    delete "$fetchDir"
     delete "$projectDir/fetched"
     delete "$fetchTemp"
 }
