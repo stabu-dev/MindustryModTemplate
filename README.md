@@ -9,42 +9,67 @@ This template is based on the public version of the [ProjectUnity](https://githu
 Before diving in, a good understanding of Java and Git is **highly recommended**. While not impossible to start without, you'll likely encounter fewer hurdles with prior experience. The Mindustry modding community, particularly on [Discord](https://discord.gg/mindustry), is a great resource for help.
 
 1.  **Install Prerequisites:**
-    *   **JDK 17 or higher:** This is essential for compiling this.
+    *   **JDK 17 or higher:** This is essential for compiling the template and your mod. Checked by `settings.gradle`.
     *   **IDE (Recommended):** [IntelliJ IDEA](https://www.jetbrains.com/idea/download/) (Community Edition is free) is strongly suggested over basic text editors.
 2.  **Create Your Repository:**
-    *   Click the `Use this template` button on the [GitHub repository page](`https://github.com/stabu-dev/MindustryModTemplate`).
+    *   Click the `Use this template` button on the [GitHub repository page](https://github.com/stabu-dev/MindustryModTemplate) (or your fork).
     *   Select "Create a new repository".
 3.  **Clone Your Repository:**
     *   Clone the newly created repository to your local machine.
 
 > [!IMPORTANT]
-> A **local copy** is *not* the ZIP archive you can download from GitHub. Use `git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY_NAME` or the cloning feature provided by your Git client (like GitHub Desktop). 
-> 
+> A **local copy** is *not* the ZIP archive you can download from GitHub. Use `git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY_NAME.git` or the cloning feature provided by your Git client (like GitHub Desktop), for version control and keeping your sanity.
+>
 > Downloading the ZIP bypasses Git's version control capabilities.
 
 4.  **Configure Your Mod:**
+
     This template is designed to make initial setup straightforward. You'll primarily need to modify the following:
 
     *   **`mod.json`:** This file contains your mod's metadata.
-        *   `name`: The internal, unique ID for your mod (e.g., `my-awesome-mod`). This is critical and used by Gradle, generators, annotations, tools, and Mindustry itself. **It's highly recommended that your main Java package and related initial `template` folders (like `main/src/template`, `annotations/src/template`, `tools/src/template`) are renamed to match this value (e.g., if `name` is `my-awesome-mod`, rename the `template` package to `myawesomemod`). This consistency greatly improves clarity, convenience, and compatibility with the template's systems.**
-        *   `displayName`: The user-friendly name shown in Mindustry's mod browser (e.g., `My Awesome Mod`). This also influences the default names of your built JAR files.
+        *   `name`: The internal, unique ID for your mod (e.g., `my-awesome-mod`). This is critical and used by Gradle, generators, annotations, tools, and Mindustry itself. **It's highly recommended that your main Java package and related initial `template` folders (like `main/src/template`, `annotations/src/template/annotations`, `tools/src/template/tools`) are renamed to match this value (e.g., if `name` is `my-awesome-mod`, rename the `template` package to `myawesomemod`). This consistency greatly improves clarity, convenience, and compatibility with the template's systems.**
+        *   `displayName`: The user-friendly name shown in Mindustry's mod browser (e.g., `My Awesome Mod`). This also influences the default names of your built JAR files via Gradle.
         *   `author`: Your name or your team's name.
         *   `description`: A brief description of your mod.
         *   `version`: Your mod's version (e.g., `1.0.0`).
-        *   `minGameVersion`: The minimum Mindustry version your mod supports (e.g., `146`).
+        *   `minGameVersion`: The minimum Mindustry version your mod supports (e.g., `149`).
         *   `main`: The fully qualified name of your main mod class (e.g., `myawesomemod.MyAwesomeMod`).
     *   **`gradle.properties`:**
-        *   `classPrefix`: A prefix for certain generated Java classes (like `YourPrefixSounds.java`, `YourPrefixEntityMapping`). If left empty, it defaults to your `displayName` from `mod.json` (with spaces removed). For example, if `displayName` is "My Awesome Mod", `classPrefix` would default to `MyAwesomeMod`.
+        *   `classPrefix`: A prefix for certain generated Java classes (like `YourPrefixSounds.java`, `YourPrefixEntityMapping.java`). If left empty, it defaults to your `displayName` from `mod.json` (with spaces removed). For example, if `displayName` is "My Awesome Mod", `classPrefix` would default to `MyAwesomeMod`.
         *   `mindustryPath` (Optional): If you want the `./gradlew install` task to copy the built mod to a custom Mindustry mods directory, specify the path here. Leave empty for automatic detection.
     *   **Java Source Files:**
-        *   Rename the default package `template` in `main/src/` to a name that preferably matches your `mod.json` `name` (e.g., if `mod.json` `name` is `my-awesome-mod`, rename the `template` package to `myawesomemod`).
+        *   Rename the default package `template` in `main/src/` (e.g., to `myawesomemod` if your `mod.json` `name` is `my-awesome-mod`).
         *   Rename the main mod class `main/src/(your-new-package-name)/Template.java` to your desired class name (e.g., `MyAwesomeMod.java`).
         *   Ensure the `main` property in `mod.json` matches the new fully qualified name of this class (e.g., `myawesomemod.MyAwesomeMod`).
-        *   You also need to refactor package names within the `annotations` and `tools` modules (e.g., from `template.annotations.processors` to `myawesomemod.annotations.processors`, and similar for `tools/src/template`).
+        *   Refactor package names within the `annotations` and `tools` modules. For example:
+            *   `annotations/src/template/annotations/...` to `annotations/src/myawesomemod/annotations/...`
+            *   `tools/src/template/tools/...` to `tools/src/myawesomemod/tools/...`
+            *   Update the `package` declarations within the Java files in these refactored directories.
     *   **GitHub Actions CI (`.github/workflows/ci.yml`):**
-        *   The artifact names and release file names are *dynamically generated* based on the `displayName` in your `mod.json`. No manual changes for naming are typically needed in `ci.yml` after the initial setup of `mod.json`.
+        *   The Gradle build system will name your JAR files based on `modDisplayName` from `mod.json` (e.g., `MyAwesomeMod.jar`, `MyAwesomeModDesktop.jar`).
+        *   However, the `ci.yml` file has **hardcoded paths and artifact names** that you **must update** to match your mod's `displayName`.
+        *   Specifically, find these sections and update them:
+            *   Under `steps:` for the `Build and Publish Jar` job:
+              ```diff
+              - name: Upload built mod artifact as a GitHub Action artifact
+                # ...
+                with:
+              -   name: Template (in a box)
+              -   path: main/build/libs/Template.jar
+              +   name: YourModDisplayName (in a box) # Or any artifact name you prefer
+              +   path: main/build/libs/YourModDisplayName.jar # Match Gradle output
+              ```
+            *   And for the release:
+              ```diff
+              - name: Upload built mod artifact into release
+                # ...
+                with:
+              -   files: build/libs/Template.jar
+              +   files: build/libs/YourModDisplayName.jar # Match Gradle output for the cross-platform JAR
+              ```
+            Replace `YourModDisplayName` with the value of `modDisplayName` from your `mod.json` (with spaces removed, e.g., if `displayName` is "My Awesome Mod", use `MyAwesomeMod`).
 
-    Here's an example of a properly configured mod base, assuming the mod is named "My Awesome Mod" (with internal name `my-awesome-mod`):
+    Here's an example of a properly configured mod base, assuming the mod's `displayName` is "My Awesome Mod" and `name` in `mod.json` is `my-awesome-mod`:
 
     ```mermaid
     ---
@@ -62,7 +87,8 @@ Before diving in, a good understanding of Java and Git is **highly recommended**
     workflows{{"workflows/"}};
     annotations_mod{{"annotations/"}};
     annotations_src{{"src/"}};
-    annotations_pkg{{"myawesomemod/"}};
+    annotations_pkg_root{{"myawesomemod/"}};
+    annotations_pkg_sub{{"annotations/"}};
     main_mod{{"main/"}};
     main_assets{{"assets/"}};
     main_assets_raw{{"assets-raw/"}};
@@ -70,7 +96,8 @@ Before diving in, a good understanding of Java and Git is **highly recommended**
     main_pkg{{"myawesomemod/"}};
     tools_mod{{"tools/"}};
     tools_src{{"src/"}};
-    tools_pkg{{"myawesomemod/"}};
+    tools_pkg_root{{"myawesomemod/"}};
+    tools_pkg_sub{{"tools/"}};
 
     ci_yml(["ci.yml"]);
     mod_json(["mod.json"]);
@@ -79,19 +106,21 @@ Before diving in, a good understanding of Java and Git is **highly recommended**
     settings_gradle(["settings.gradle"]);
     main_build_gradle(["build.gradle"]);
     main_java_file(["MyAwesomeMod.java"]);
+    annotations_java_file(["Annotations.java, ..."]);
+    tools_java_file(["Tools.java, ..."]);
 
-    class root,github,workflows,annotations_mod,annotations_src,annotations_pkg,main_mod,main_assets,main_assets_raw,main_src,main_pkg,tools_mod,tools_src,tools_pkg folder;
-    class ci_yml,root_build_gradle,settings_gradle,main_build_gradle file;
-    class mod_json,gradle_properties,main_java_file importantFile;
+    class root,github,workflows,annotations_mod,annotations_src,annotations_pkg_root,annotations_pkg_sub,main_mod,main_assets,main_assets_raw,main_src,main_pkg,tools_mod,tools_src,tools_pkg_root,tools_pkg_sub folder;
+    class root_build_gradle,settings_gradle,main_build_gradle file;
+    class mod_json,gradle_properties,main_java_file,annotations_java_file,tools_java_file,ci_yml importantFile;
 
     root-->github-->workflows-->ci_yml;
-    root-->annotations_mod-->annotations_src-->annotations_pkg;
+    root-->annotations_mod-->annotations_src-->annotations_pkg_root-->annotations_pkg_sub-->annotations_java_file;
     root-->main_mod;
     main_mod-->main_assets;
     main_mod-->main_assets_raw;
     main_mod-->main_src-->main_pkg-->main_java_file;
     main_mod-->main_build_gradle;
-    root-->tools_mod-->tools_src-->tools_pkg;
+    root-->tools_mod-->tools_src-->tools_pkg_root-->tools_pkg_sub-->tools_java_file;
     root-->mod_json & gradle_properties & root_build_gradle & settings_gradle;
     ```
 
@@ -134,8 +163,8 @@ Before diving in, a good understanding of Java and Git is **highly recommended**
     import arc.util.*;
     // ... other imports ...
     - import template.gen.*;
-    + import myawesomemod.gen.*; // Assuming classPrefix led to this, or it's your gen package
-
+    + import myawesomemod.gen.*; // Assuming classPrefix and modName led to this
+    
     - public class Template extends Mod{
     + public class MyAwesomeMod extends Mod{
         // ...
@@ -144,9 +173,9 @@ Before diving in, a good understanding of Java and Git is **highly recommended**
 
 5.  **Asset Workflow:**
     *   Place your **raw, unprocessed assets** (e.g., original PNGs for sprites, WAV files for sounds) into the `main/assets-raw/` directory. Use a logical subdirectory structure (e.g., `sprites/units/`, `sounds/effects/`).
-    *   Run the asset processing task: `./gradlew tools:proc`.
+    *   Run the asset processing task: `./gradlew tools:proc` (or `gradlew.bat tools:proc` on Windows).
     *   Processed assets will be output to `main/assets/`, mirroring the structure from `assets-raw/`. These are the assets bundled into your mod.
-    *   Generated asset classes like `Regions.java`, `MyAwesomeModSounds.java` (if `classPrefix` is `MyAwesomeMod`) will be created/updated in the `main/build/generated/myawesomemod/gen/` directory (assuming your main package is `myawesomemod`) and automatically included in compilation.
+    *   Generated asset classes like `Regions.java`, `MyAwesomeModSounds.java` (if `classPrefix` is `MyAwesomeMod`) will be created/updated in the `main/build/generated/sources/annotationProcessor/java/main/yourmodpackage/gen/` directory (e.g., `myawesomemod/gen/`) and automatically included in compilation.
 
     That's the core setup! You can now start developing your mod.
 
@@ -178,9 +207,9 @@ This produces a JAR compatible with both Android and PC (e.g., `MyAwesomeMod.jar
 
 *   **Using GitHub Actions (Recommended):**
     *   Push your changes to your GitHub repository.
-    *   The CI workflow (defined in `.github/workflows/ci.yml`) will automatically build both Desktop and Android JARs.
-    *   You can download these from the "Artifacts" section of the completed workflow run. The Android-compatible JAR will be named like `My Awesome Mod (Android).zip` (containing the JAR, name derived from `displayName`).
-    *   When you create a GitHub Release, the Android-compatible JAR is automatically uploaded.
+    *   The CI workflow (defined in `.github/workflows/ci.yml` and **manually updated by you as described in step 4**) will automatically build both Desktop and Android JARs.
+    *   You can download these from the "Artifacts" section of the completed workflow run. The cross-platform JAR artifact might be named something like `MyAwesomeMod (in a box).zip` (containing `MyAwesomeMod.jar`), depending on how you updated `ci.yml`.
+    *   When you create a GitHub Release, the cross-platform JAR (e.g., `MyAwesomeMod.jar`) is automatically uploaded if you configured `ci.yml` correctly.
 
 *   **Local Android Build (Optional):**
     If you need to build for Android locally:
@@ -191,52 +220,52 @@ This produces a JAR compatible with both Android and PC (e.g., `MyAwesomeMod.jar
         *   Inside the extracted `cmdline-tools` folder, create a new folder named `latest`. Move all contents of `cmdline-tools` (like `bin`, `lib`, etc.) *into* this `latest` folder. The structure should be `AndroidSDK/cmdline-tools/latest/`.
         *   Set the `ANDROID_HOME` (or `ANDROID_SDK_ROOT`) environment variable to the full path of your `AndroidSDK` directory (e.g., `~/AndroidSDK`). Restart your terminal for changes to take effect.
         *   Navigate your terminal to `AndroidSDK/cmdline-tools/latest/bin/`.
-        *   Run `sdkmanager --licenses` and accept all licenses by typing 'y' and pressing Enter for each.
+        *   Run `sdkmanager --licenses` (or `sdkmanager.bat --licenses` on Windows) and accept all licenses by typing 'y' and pressing Enter for each.
         *   Install the necessary SDK platforms and build tools. The versions are specified in `.github/workflows/ci.yml` (look for the `sdkmanager` command):
             ```bash
             sdkmanager "platforms;android-33" "build-tools;33.0.2"
             ```
+            (Use `sdkmanager.bat` on Windows).
     2.  **Build the Mod:**
         *   In your mod's root directory, run:
             ```bash
             ./gradlew main:dex
             ```
+            (Use `gradlew.bat main:dex` on Windows).
         *   The cross-platform JAR will be located in `main/build/libs/`.
-
-## Key Features Deep Dive
-
-*   **Annotations & Code Generation (`annotations` module):** This is the heart of the template's power. Explore `Annotations.java` (likely in `annotations/src/yourmodpackage/annotations/`) to see available annotations. Processors in `annotations/src/yourmodpackage/annotations/processors/` handle the generation. For example, `@EntityDef` and `@EntityComponent` simplify entity creation, while `@LoadRegs` automates `TextureRegion` field generation in a `Regions` class.
-*   **Asset Processing (`tools` module):** The `tools:proc` task executes logic in `tools/src/yourmodpackage/tools/Processors.java`. You can add custom `Processor` implementations to automate tasks like sprite sheet packing, sound conversion, or custom data generation.
-*   **Vanilla Component Fetching (`main:fetchComps`):** Allows you to work with slightly modified versions of Mindustry's own entity components, making it easier to extend or interact with vanilla game mechanics.
-*   **Jabel:** Enables you to use modern Java syntax (records, text blocks, var, etc., up to Java 17) while the compiled bytecode remains Java 8 compatible, ensuring your mod runs on Mindustry.
 
 ## Notable Gradle Tasks
 
-*   `main:deploy`: Builds the desktop-only JAR.
-*   `main:dex`: Builds the Android-compatible (cross-platform) JAR.
-*   `install`: Copies the `main:deploy` output to the local Mindustry mods folder.
-*   `tools:proc`: Runs the asset processing pipeline (defined in the `tools` module).
-*   `main:fetchComps`: Downloads and adapts Mindustry's core entity components into `main/build/fetched/`.
-*   `updateBundles`: Synchronizes localization files in `main/assets/bundles/` based on `bundle.properties`. Changes are automatically committed by CI.
-*   `clean`: Deletes all `build` directories.
-*   `cleanFetched`: Deletes only the fetched vanilla components from `main/build/fetched/`.
-*   `tools:rearchive`: If you run `tools:proc` and only assets change, this task can update your existing built JARs (from `main:deploy` and `main:dex`) with the new assets without fully recompiling the `main` module's Java code.
+*   `main:deploy`: Builds the desktop-only JAR (e.g., `YourModDisplayNameDesktop.jar`).
+*   `main:dex`: Builds the Android-compatible (cross-platform) JAR (e.g., `YourModDisplayName.jar`).
+*   `install`: Copies the `main:deploy` output (desktop JAR) to the local Mindustry mods folder.
+*   `tools:proc`: Runs the asset processing pipeline (defined in the `tools` module), processing files from `main/assets-raw/` to `main/assets/`.
+*   `main:fetchComps`: Downloads and adapts Mindustry's core entity components into a temporary build directory for compilation.
+*   `updateBundles`: Synchronizes localization files in `main/assets/bundles/` based on `bundle.properties`. Changes are automatically committed and pushed by the CI workflow if changes are detected.
+*   `clean`: Deletes all `build` directories across all modules.
+*   `cleanFetched`: Deletes only the fetched vanilla components from the temporary build directory and the `fetch.txt` marker.
+*   `tools:rearchive`: If `tools:proc` is run and only assets change, this task (if `toolRearchive` property is true, which it is by default) updates your existing built JARs (from `main:deploy` and `main:dex`) with the new assets without fully recompiling the `main` module's Java code.
 
 ## Adding Dependencies
 
 *   **Mindustry / Arc / Other Mindustry Mods:**
-    Always use `compileOnly` as these are provided by the game at runtime and should not be bundled.
+    Always use `compileOnly` in your `main/build.gradle` as these are provided by the game at runtime and should not be bundled.
     ```gradle
     // In main/build.gradle
     dependencies {
         compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
         compileOnly "com.github.Anuken.Arc:arc-core:$arcVersion"
-        // Example: compileOnly "com.github.author:other-mod-api:1.2.3"
+        // Example for another mod's API:
+        // compileOnly "com.github.theiruser:their-mod-api:1.2.3"
+
+        // For annotation processing
+        annotationProcessor project(':annotations')
+        compileOnly project(':annotations') // If you need to reference annotations directly in main code
     }
     ```
 
 *   **External Java Libraries (to be bundled with your mod):**
-    Use `implementation`.
+    Use `implementation` in your `main/build.gradle`.
     ```gradle
     // In main/build.gradle
     dependencies {
