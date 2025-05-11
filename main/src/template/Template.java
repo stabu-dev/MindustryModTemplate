@@ -9,7 +9,6 @@ import mindustry.mod.*;
 import mindustry.ui.dialogs.*;
 
 import template.annotations.Annotations.*;
-import template.content.TUnitTypes;
 import template.gen.*;
 
 import static mindustry.Vars.*;
@@ -64,7 +63,6 @@ public class Template extends Mod{
 
     @Override
     public void loadContent(){
-        TUnitTypes.load();
         //below has to be done after all things are loaded.
         TemplateEntityMapping.init();
     }
