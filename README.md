@@ -86,8 +86,8 @@ Before diving in, a good understanding of Java and Git is **highly recommended**
     template_java(["Template.java (initial)"]);
     my_awesome_mod_java(["MyAwesomeMod.java (renamed)"]);
 
-    class ci_yml, root_build_gradle, settings_gradle, main_build_gradle file;
-    class mod_json, gradle_properties, template_java, my_awesome_mod_java importantFile;
+    class ci_yml, root_build_gradle, settings_gradle, main_build_gradle file
+    class mod_json, gradle_properties, template_java, my_awesome_mod_java importantFile
 
     root-->github-->workflows-->ci_yml;
     root-->annotations_mod-->annotations_src;
