@@ -75,7 +75,7 @@ Before diving in, a good understanding of Java and Git is **highly recommended**
     tools_src_template_pkg{{"template/ (initial)"}};
     tools_src_myawesome_pkg{{"myawesomemod/ (renamed)"}};
 
-    class root,github,workflows,annotations_mod,annotations_src,annotations_src_template_pkg,annotations_src_myawesome_pkg,main_mod,main_assets,main_assets_raw,main_src,main_src_template_pkg,main_src_myawesome_pkg,tools_mod,tools_src,tools_src_template_pkg,tools_src_myawesome_pkg folder;
+    class root,github,workflows,annotations_mod,annotations_src,annotations_src_template_pkg,annotations_src_myawesome_pkg,main_mod,main_assets,main_assets_raw,main_src,main_src_template_pkg,main_src_myawesome_pkg,tools_mod,tools_src,tools_src_template_pkg,tools_src_myawesome_pkg folder
 
     ci_yml(["ci.yml"]);
     mod_json(["mod.json"]);
@@ -86,8 +86,8 @@ Before diving in, a good understanding of Java and Git is **highly recommended**
     template_java(["Template.java (initial)"]);
     my_awesome_mod_java(["MyAwesomeMod.java (renamed)"]);
 
-    class ci_yml, root_build_gradle, settings_gradle, main_build_gradle file
-    class mod_json, gradle_properties, template_java, my_awesome_mod_java importantFile
+    class ci_yml,root_build_gradle,settings_gradle,main_build_gradle file
+    class mod_json,gradle_properties,template_java,my_awesome_mod_java importantFile
 
     root-->github-->workflows-->ci_yml;
     root-->annotations_mod-->annotations_src;
