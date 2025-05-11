@@ -17,8 +17,10 @@ Before diving in, a good understanding of Java and Git is **highly recommended**
 3.  **Clone Your Repository:**
     *   Clone the newly created repository to your local machine.
 
-    > [!IMPORTANT]
-    > A **local copy** is *not* the ZIP archive you can download from GitHub. Use `git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY_NAME` or the cloning feature provided by your Git client (like GitHub Desktop). Downloading the ZIP bypasses Git's version control capabilities.
+> [!IMPORTANT]
+> A **local copy** is *not* the ZIP archive you can download from GitHub. Use `git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY_NAME` or the cloning feature provided by your Git client (like GitHub Desktop). 
+> 
+> Downloading the ZIP bypasses Git's version control capabilities.
 
 4.  **Configure Your Mod:**
     This template is designed to make initial setup straightforward. You'll primarily need to modify the following:
@@ -55,23 +57,23 @@ Before diving in, a good understanding of Java and Git is **highly recommended**
     classDef file fill:#468868,stroke:#bdffdf;
     classDef importantFile fill:#884668,stroke:#ffbddf,font-weight:bold;
 
-    root{{MindustryModTemplate (root)}};
+    root{{"MindustryModTemplate (root)"}};
     github{{".github/"}};
     workflows{{"workflows/"}};
     annotations_mod{{"annotations/"}};
     annotations_src{{"src/"}};
-    annotations_src_template_pkg{{"template/" (initial)}};
-    annotations_src_myawesome_pkg{{"myawesomemod/" (renamed)}};
+    annotations_src_template_pkg{{"template/ (initial)"}};
+    annotations_src_myawesome_pkg{{"myawesomemod/ (renamed)"}};
     main_mod{{"main/"}};
     main_assets{{"assets/"}};
     main_assets_raw{{"assets-raw/"}};
     main_src{{"src/"}};
-    main_src_template_pkg{{"template/" (initial)}};
-    main_src_myawesome_pkg{{"myawesomemod/" (renamed)}};
+    main_src_template_pkg{{"template/ (initial)"}};
+    main_src_myawesome_pkg{{"myawesomemod/ (renamed)"}};
     tools_mod{{"tools/"}};
     tools_src{{"src/"}};
-    tools_src_template_pkg{{"template/" (initial)}};
-    tools_src_myawesome_pkg{{"myawesomemod/" (renamed)}};
+    tools_src_template_pkg{{"template/ (initial)"}};
+    tools_src_myawesome_pkg{{"myawesomemod/ (renamed)"}};
 
     class root,github,workflows,annotations_mod,annotations_src,annotations_src_template_pkg,annotations_src_myawesome_pkg,main_mod,main_assets,main_assets_raw,main_src,main_src_template_pkg,main_src_myawesome_pkg,tools_mod,tools_src,tools_src_template_pkg,tools_src_myawesome_pkg folder;
 
