@@ -1,6 +1,8 @@
 name: Java CI
 
-on: [push, release]
+on:
+  push:
+  release:
 
 jobs:
   buildJar:
@@ -55,7 +57,11 @@ jobs:
       - name: Build mod artifacts (Desktop, Android, Process Assets)
         run: |
           chmod +x gradlew
-          ./gradlew tools:proc main:deploy main:dex
+          # Pass the dynamic modFileName into Gradle so archDexed can pick it up
+          ./gradlew tools:proc main:deploy main:dex \
+            -PmodFileName=${{ env.MOD_FILE_NAME }} \
+            --stacktrace \
+            --info
 
       - name: Upload built mod artifact (Android/Cross-platform)
         uses: actions/upload-artifact@v4
@@ -77,4 +83,5 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.event_name == 'release' && github.event.action == 'created'
         with:
-          files: main/build/libs/${{ steps.mod_details.outputs.mod_file_name_output }}.jar
+          files: |
+            main/build/libs/${{ env.MOD_FILE_NAME }}.jar
