@@ -48,7 +48,7 @@ Before diving in, a good understanding of Java and Git is **highly recommended**
 
     ```mermaid
     ---
-    title: Project Hierarchy (Initial State & Example for "My Awesome Mod")
+    title: Project Hierarchy
     ---
     graph LR;
     %%{init:{'flowchart':{'nodeSpacing': 10, 'rankSpacing': 10}}}%%;
@@ -57,25 +57,20 @@ Before diving in, a good understanding of Java and Git is **highly recommended**
     classDef file fill:#468868,stroke:#bdffdf;
     classDef importantFile fill:#884668,stroke:#ffbddf,font-weight:bold;
 
-    root{{"MindustryModTemplate (root)"}};
+    root{{"MindustryModTemplate/"}};
     github{{".github/"}};
     workflows{{"workflows/"}};
     annotations_mod{{"annotations/"}};
     annotations_src{{"src/"}};
-    annotations_src_template_pkg{{"template/ (initial)"}};
-    annotations_src_myawesome_pkg{{"myawesomemod/ (renamed)"}};
+    annotations_pkg{{"myawesomemod/"}};
     main_mod{{"main/"}};
     main_assets{{"assets/"}};
     main_assets_raw{{"assets-raw/"}};
     main_src{{"src/"}};
-    main_src_template_pkg{{"template/ (initial)"}};
-    main_src_myawesome_pkg{{"myawesomemod/ (renamed)"}};
+    main_pkg{{"myawesomemod/"}};
     tools_mod{{"tools/"}};
     tools_src{{"src/"}};
-    tools_src_template_pkg{{"template/ (initial)"}};
-    tools_src_myawesome_pkg{{"myawesomemod/ (renamed)"}};
-
-    class root,github,workflows,annotations_mod,annotations_src,annotations_src_template_pkg,annotations_src_myawesome_pkg,main_mod,main_assets,main_assets_raw,main_src,main_src_template_pkg,main_src_myawesome_pkg,tools_mod,tools_src,tools_src_template_pkg,tools_src_myawesome_pkg folder
+    tools_pkg{{"myawesomemod/"}};
 
     ci_yml(["ci.yml"]);
     mod_json(["mod.json"]);
@@ -83,32 +78,20 @@ Before diving in, a good understanding of Java and Git is **highly recommended**
     root_build_gradle(["build.gradle"]);
     settings_gradle(["settings.gradle"]);
     main_build_gradle(["build.gradle"]);
-    template_java(["Template.java (initial)"]);
-    my_awesome_mod_java(["MyAwesomeMod.java (renamed)"]);
+    main_java_file(["MyAwesomeMod.java"]);
 
-    class ci_yml,root_build_gradle,settings_gradle,main_build_gradle file
-    class mod_json,gradle_properties,template_java,my_awesome_mod_java importantFile
+    class root,github,workflows,annotations_mod,annotations_src,annotations_pkg,main_mod,main_assets,main_assets_raw,main_src,main_pkg,tools_mod,tools_src,tools_pkg folder;
+    class ci_yml,root_build_gradle,settings_gradle,main_build_gradle file;
+    class mod_json,gradle_properties,main_java_file importantFile;
 
     root-->github-->workflows-->ci_yml;
-    root-->annotations_mod-->annotations_src;
-        annotations_src --> annotations_src_template_pkg;
-        subgraph After Renaming Annotations
-            annotations_src --> annotations_src_myawesome_pkg;
-        end
+    root-->annotations_mod-->annotations_src-->annotations_pkg;
     root-->main_mod;
-        main_mod-->main_assets;
-        main_mod-->main_assets_raw;
-        main_mod-->main_src;
-            main_src --> main_src_template_pkg --> template_java;
-            subgraph After Renaming Main
-                main_src --> main_src_myawesome_pkg --> my_awesome_mod_java;
-            end
-        main_mod-->main_build_gradle;
-    root-->tools_mod-->tools_src;
-        tools_src --> tools_src_template_pkg;
-        subgraph After Renaming Tools
-            tools_src --> tools_src_myawesome_pkg;
-        end
+    main_mod-->main_assets;
+    main_mod-->main_assets_raw;
+    main_mod-->main_src-->main_pkg-->main_java_file;
+    main_mod-->main_build_gradle;
+    root-->tools_mod-->tools_src-->tools_pkg;
     root-->mod_json & gradle_properties & root_build_gradle & settings_gradle;
     ```
 
