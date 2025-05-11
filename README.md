@@ -57,7 +57,7 @@ Before diving in, a good understanding of Java and Git is **highly recommended**
     classDef file fill:#468868,stroke:#bdffdf;
     classDef importantFile fill:#884668,stroke:#ffbddf,font-weight:bold;
 
-    root{{"MindustryModTemplate/"}};
+    root{{"/"}};
     github{{".github/"}};
     workflows{{"workflows/"}};
     annotations_mod{{"annotations/"}};
