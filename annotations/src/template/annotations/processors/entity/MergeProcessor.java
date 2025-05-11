@@ -23,11 +23,7 @@ import static javax.lang.model.type.TypeKind.*;
 
 /** @author GlennFolker */
 @SuppressWarnings("all")
-@SupportedAnnotationTypes({
-    "template.annotations.Annotations.Merge",
-    "template.annotations.Annotations.MergeComponent",
-    "template.annotations.Annotations.MergeInterface"
-})
+@SupportedOptions({"modName"})
 public class MergeProcessor extends BaseProcessor{
     Seq<TypeElement> comps = new Seq<>();
     Seq<TypeElement> inters = new Seq<>();
@@ -42,6 +38,16 @@ public class MergeProcessor extends BaseProcessor{
 
     {
         rounds = 3;
+    }
+
+    @Override
+    public Set<String> getSupportedAnnotationTypes() {
+        Set<String> types = new HashSet<>();
+        String prefix = processingEnv.getOptions().get("modName") + ".annotations.Annotations.";
+        types.add(prefix + "Merge");
+        types.add(prefix + "MergeComponent");
+        types.add(prefix + "MergeInterface");
+        return types;
     }
 
     @Override
@@ -494,7 +500,7 @@ public class MergeProcessor extends BaseProcessor{
                     );
                 }
 
-                if(method.getReturnType().getKind() == VOID && !Seq.with(field.annotations).contains(f -> f.type.toString().equals("@template.annotations.Annotations.ReadOnly"))){
+                if(method.getReturnType().getKind() == VOID && !Seq.with(field.annotations).contains(f -> f.type.toString().equals("@" + modName + ".annotations.Annotations.ReadOnly"))){
                     def.builder.addMethod(
                         MethodSpec.methodBuilder(var).addModifiers(Modifier.PUBLIC)
                             .returns(TypeName.VOID)

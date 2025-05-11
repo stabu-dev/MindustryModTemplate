@@ -16,10 +16,10 @@ public class GenAtlas extends TextureAtlas{
     public GenRegion clear;
     private final ObjectMap<String, GenRegion> regions = new ObjectMap<>();
 
-    /** The name should be prefixed with {@code template-} */
+    /** The name should be prefixed with {@code modName-} */
     public GenRegion addRegion(Fi file){
         String name = file.nameWithoutExtension();
-        if(!file.path().contains("sprites/vanilla/")) name = "template-" + name;
+        if(!file.path().contains("sprites/vanilla/")) name = System.getProperty("currentModName") + "-" + name;
 
         GenRegion reg = new GenRegion(name, new Pixmap(file));
 
@@ -34,7 +34,7 @@ public class GenAtlas extends TextureAtlas{
         }
     }
 
-    /** @inheritDocs. The name should be prefixed with {@code template-} */
+    /** @inheritDocs. The name should be prefixed with {@code modName-} */
     @Override
     public GenRegion addRegion(String name, TextureRegion textureRegion){
         synchronized(regions){
@@ -45,7 +45,7 @@ public class GenAtlas extends TextureAtlas{
         }
     }
 
-    /** @inheritDocs. The name should be prefixed with {@code template-} */
+    /** @inheritDocs. The name should be prefixed with {@code modName-} */
     @Override
     public GenRegion addRegion(String name, Texture texture, int x, int y, int width, int height){
         Pixmap pixmap = texture.getTextureData().getPixmap();
@@ -143,7 +143,7 @@ public class GenAtlas extends TextureAtlas{
             Fi dir = spritesDir.child(relativePath);
             dir.mkdirs();
 
-            Fi file = dir.child(name.replaceFirst("template-", "") + ".png");
+            Fi file = dir.child(name.replaceFirst(System.getProperty("currentModName") + "-", "") + ".png");
             file.writePng(pixmap);
 
             if(add) atlas.addRegion(name, this);

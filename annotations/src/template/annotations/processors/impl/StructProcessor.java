@@ -19,15 +19,21 @@ import java.util.*;
  * @author GlennFolker
  */
 @SuppressWarnings("unchecked")
-@SupportedAnnotationTypes({
-    "template.annotations.Annotations.Struct",
-    "template.annotations.Annotations.StructWrap"
-})
+@SupportedOptions({"modName"})
 public class StructProcessor extends BaseProcessor{
     ObjectMap<Element, OrderedMap<VariableElement, SInfo>> structs = new ObjectMap<>();
 
     {
         rounds = 2;
+    }
+
+    @Override
+    public Set<String> getSupportedAnnotationTypes() {
+        Set<String> types = new HashSet<>();
+        String prefix = processingEnv.getOptions().get("modName") + ".annotations.Annotations.";
+        types.add(prefix + "Struct");
+        types.add(prefix + "StructWrap");
+        return types;
     }
 
     @Override

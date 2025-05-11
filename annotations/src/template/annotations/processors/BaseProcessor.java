@@ -33,7 +33,7 @@ import static javax.lang.model.type.TypeKind.*;
  */
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public abstract class BaseProcessor extends AbstractProcessor{
-    public static final String packageName = "template.gen";
+    public static String packageName = ".gen";
 
     public JavacElements elements;
     public JavacTrees trees;
@@ -44,8 +44,19 @@ public abstract class BaseProcessor extends AbstractProcessor{
     protected int round;
     protected int rounds = 1;
 
+    public static String modName;
+    public static String classPrefix;
+
     static{
         Vars.loadLogger();
+    }
+
+    @Override
+    public Set<String> getSupportedOptions() {
+        Set<String> options = new HashSet<>();
+        options.add("modName");
+        options.add("classPrefix");
+        return options;
     }
 
     @Override
@@ -53,6 +64,11 @@ public abstract class BaseProcessor extends AbstractProcessor{
         super.init(processingEnv);
 
         JavacProcessingEnvironment javacProcessingEnv = (JavacProcessingEnvironment)processingEnv;
+
+        this.modName = processingEnv.getOptions().get("modName");
+        this.classPrefix = processingEnv.getOptions().get("classPrefix");
+
+        packageName = modName + ".gen";
 
         elements = javacProcessingEnv.getElementUtils();
         trees = JavacTrees.instance(javacProcessingEnv);
@@ -168,7 +184,7 @@ public abstract class BaseProcessor extends AbstractProcessor{
     }
 
     public static ClassName cName(String canonical){
-        canonical = canonical.replace("<any?>", "template.gen");
+        canonical = canonical.replace("<any?>", modName + ".gen");
 
         Matcher matcher = Pattern.compile("\\.[A-Z]").matcher(canonical);
         boolean find = matcher.find();

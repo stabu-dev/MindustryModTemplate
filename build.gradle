@@ -1,3 +1,16 @@
+import groovy.json.JsonSlurper
+
+def modJson = new File(rootDir, 'mod.json')
+def modInfo = new JsonSlurper().parseText(modJson.text)
+
+ext {
+    modName = modInfo.name
+    modDisplayName = modInfo.displayName.toString().replaceAll(/\s+/, '')
+    modVersion = modInfo.version
+
+    classPrefix = project.getProperty('classPrefix').toString().replaceAll(/\s+/, '') ?: modDisplayName
+}
+
 buildscript{
     dependencies{
         classpath "com.github.Anuken.Arc:arc-core:$arcVersion"
@@ -17,7 +30,6 @@ allprojects{
     apply plugin: 'java'
     apply plugin: 'maven-publish'
 
-    group = 'com.github.ModTemplate'
     version = modVersion
 
     ext{
@@ -72,6 +84,14 @@ allprojects{
         options.incremental = true
         options.encoding = 'UTF-8'
         options.compilerArgs += '-Xlint:deprecation'
+
+        def currentModName = rootProject.ext.modName
+        def currentClassPrefix = rootProject.ext.classPrefix
+
+        options.compilerArgs += [
+                "-AmodName=${currentModName}",
+                "-AclassPrefix=${currentClassPrefix}"
+        ]
 
         options.fork = true
         options.forkOptions.jvmArgs += [

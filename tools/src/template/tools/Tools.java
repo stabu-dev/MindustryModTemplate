@@ -26,7 +26,7 @@ import static mindustry.Vars.*;
  * @author GlennFolker
  */
 public final class Tools{
-    public static Template template;
+    public static Template thisMod;
     public static LoadedMod mod;
     public static ModMeta meta;
 
@@ -74,24 +74,23 @@ public final class Tools{
         content = new ContentLoader();
         content.createBaseContent();
 
-        template = new Template(true);
+        thisMod = new Template(true);
 
-        meta = new ModMeta(){{ name = "template"; }};
-        mod = new LoadedMod(null, null, template, Tools.class.getClassLoader(), meta);
+        meta = new ModMeta(){{ name = System.getProperty("currentModName"); }};
+        mod = new LoadedMod(null, null, thisMod, Tools.class.getClassLoader(), meta);
 
         Reflect.<Seq<LoadedMod>>get(Mods.class, mods, "mods").add(mod);
         Reflect.<ObjectMap<Class<?>, ModMeta>>get(Mods.class, mods, "metas").put(Template.class, meta);
 
+        addRegions();
+        atlas.clear = atlas.find("clear");
+
         content.setCurrentMod(mod);
-        template.loadContent();
+        thisMod.loadContent();
         content.setCurrentMod(null);
 
         Log.logger = new DefaultLogHandler();
         loadLogger();
-
-        addRegions();
-
-        atlas.clear = atlas.find("clear");
 
         runs.run();
         Processors.process();

@@ -21,11 +21,7 @@ import static javax.lang.model.type.TypeKind.*;
 /** @author sunny
  * Dupes a class, but simply changes its superclass to the one specified. Also omits methods and fields marked with @Ignore. */
 @SuppressWarnings("all")
-@SupportedAnnotationTypes({
-        "template.annotations.Annotations.Dupe",
-        "template.annotations.Annotations.DupeComponent",
-        "template.annotations.Annotations.DupeInterface"
-})
+@SupportedOptions({"modName"})
 public class DupeProcessor extends BaseProcessor{
     Seq<TypeElement> comps = new Seq<>();
     Seq<TypeElement> inters = new Seq<>();
@@ -40,6 +36,16 @@ public class DupeProcessor extends BaseProcessor{
 
     {
         rounds = 2;
+    }
+
+    @Override
+    public Set<String> getSupportedAnnotationTypes() {
+        Set<String> types = new HashSet<>();
+        String prefix = processingEnv.getOptions().get("modName") + ".annotations.Annotations.";
+        types.add(prefix + "Dupe");
+        types.add(prefix + "DupeComponent");
+        types.add(prefix + "DupeInterface");
+        return types;
     }
 
     @Override

@@ -23,7 +23,7 @@ dependencies{
 }
 
 ext{
-    fetchPackage = 'template/fetched'
+    fetchPackage = modName + '/fetched'
     fetchDir = file("${compileJava.temporaryDir}/fetched/$fetchPackage")
     fetchTemp = file("${compileJava.temporaryDir}/fetch.txt")
     fetchRevision = 0
@@ -43,7 +43,7 @@ task deploy(type: Jar, dependsOn: configurations.runtimeClasspath){
         if(taskNames.contains('main:deploy')) println 'Sprites folder not found; automatically generating sprites...'
     }
 
-    archiveFileName.set "${modName}Desktop.jar"
+    archiveFileName.set "${modDisplayName}Desktop.jar"
 
     from files(sourceSets.main.output.classesDirs)
     from files(sourceSets.main.output.resourcesDir)
@@ -57,7 +57,7 @@ task deploy(type: Jar, dependsOn: configurations.runtimeClasspath){
 }
 
 task dex(type: Jar){
-    archiveFileName.set "${modName}.jar"
+    archiveFileName.set "${modDisplayName}.jar"
 
     final def desktopJar = deploy.archiveFile.get().asFile
     final def dexJar = new File(dex.temporaryDir, 'Dexed.jar')
@@ -84,7 +84,7 @@ task dex(type: Jar){
 task dmove(dependsOn: deploy){
     doLast{
         copy{
-            from "build/libs/TemplateDesktop.jar"
+            from "build/libs/${modDisplayName}Desktop.jar"
             into System.getenv("destination")
         }
     }
@@ -137,7 +137,7 @@ task fetchComps{
                                 .block({ final comp ->
                                     final def content = comp.getResultAsString()
                                         .replace('mindustry.entities.comp', fetchPackage.replace('/', '.'))
-                                        .replace('mindustry.annotations.Annotations.*', 'template.annotations.Annotations.*')
+                                        .replace('mindustry.annotations.Annotations.*', modName + '.annotations.Annotations.*')
                                         .replaceAll('@Component\\((base = true|.)+\\)\n*', '@EntityComponent(base = true, write = false)\n')
                                         .replaceAll('@Component\n*', '@EntityComponent(write = false)\n')
                                         .replaceAll('@BaseComponent\n*', '@EntityBaseComponent\n')
@@ -211,9 +211,9 @@ tasks.withType(JavaCompile){
 tasks.withType(Jar){
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
-    exclude 'template/fetched/**'
-    exclude 'template/entities/comp/**'
-    exclude 'template/entities/merge/**'
+    exclude modName + '/fetched/**'
+    exclude modName + '/entities/comp/**'
+    exclude modName + '/entities/merge/**'
 
     exclude 'sprites/vanilla/**'
 }

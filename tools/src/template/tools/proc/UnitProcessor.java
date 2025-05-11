@@ -147,7 +147,7 @@ public class UnitProcessor implements Processor{
 
                 GenRegion unitBaseRegion = conv(type.region);
                 if(!unitBaseRegion.found()){
-                    Log.warn("Base region not found for unit: @. Skipping sprite generation.", type.name);
+                    Log.warn("Base region @ not found for unit: @. Skipping sprite generation.", unitBaseRegion, type.name);
                     return;
                 }
 

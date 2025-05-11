@@ -11,12 +11,23 @@ import template.annotations.processors.*;
 import javax.annotation.processing.*;
 import javax.lang.model.element.*;
 import java.lang.annotation.*;
+import java.util.HashSet;
+import java.util.Set;
 
 /** @author GlennFolker */
-@SupportedAnnotationTypes("template.annotations.Annotations.LoadRegs")
+@SupportedOptions({"modName"})
+
 public class LoadProcessor extends BaseProcessor{
     {
         rounds = 1;
+    }
+
+    @Override
+    public Set<String> getSupportedAnnotationTypes() {
+        Set<String> types = new HashSet<>();
+        String prefix = processingEnv.getOptions().get("modName") + ".annotations.Annotations.";
+        types.add(prefix + "LoadRegs");
+        return types;
     }
 
     @Override
@@ -70,7 +81,7 @@ public class LoadProcessor extends BaseProcessor{
                             Modifier.PUBLIC, Modifier.STATIC
                         ).build()
                     );
-                    load.addStatement("$L = $T.atlas.find($S)", name + "Region", cName(Core.class), "template-" + reg);
+                    load.addStatement("$L = $T.atlas.find($S)", name + "Region", cName(Core.class), modName + "-" + reg);
 
                     if(ann.outline()){
                         spec.addField(
@@ -88,7 +99,7 @@ public class LoadProcessor extends BaseProcessor{
                                 .build()
                         );
 
-                        load.addStatement("$L = $T.atlas.find($S)", name + "OutlineRegion", cName(Core.class), "template-" + reg + "-outline");
+                        load.addStatement("$L = $T.atlas.find($S)", name + "OutlineRegion", cName(Core.class), modName + "-" + reg + "-outline");
                     }
                 }
             }

@@ -12,6 +12,8 @@ import template.annotations.processors.util.TypeIOResolver.*;
 
 import javax.lang.model.element.*;
 
+import static template.annotations.processors.BaseProcessor.*;
+
 public class EntityIO{
     final String name;
     final TypeSpec.Builder type;
@@ -130,7 +132,7 @@ public class EntityIO{
     }
 
     public void io(BaseProcessor proc, String type, String field){
-        type = type.replace("mindustry.gen.", "").replace("template.gen.", "");
+        type = type.replace("mindustry.gen.", "").replace(modName + ".gen.", "");
 
         if(BaseProcessor.isPrimitive(type)){
             s(type.equals("boolean") ? "bool" : type.charAt(0) + "", field);

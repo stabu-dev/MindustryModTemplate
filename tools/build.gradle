@@ -98,8 +98,9 @@ task proc(dependsOn: [classes, configurations.runtimeClasspath]){
 
         javaexec{
             workingDir = assetsDir
-            main = 'template.tools.Tools'
+            main = modName + '.tools.Tools'
             classpath = sourceSets.main.runtimeClasspath
+            systemProperty 'currentModName', modName
         }
     }
 }

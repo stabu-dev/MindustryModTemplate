@@ -28,12 +28,7 @@ import static javax.lang.model.type.TypeKind.*;
  * @author GlennFolker
  */
 @SuppressWarnings("all")
-@SupportedAnnotationTypes({
-    "template.annotations.Annotations.EntityComponent",
-    "template.annotations.Annotations.EntityBaseComponent",
-    "template.annotations.Annotations.EntityDef",
-    "template.annotations.Annotations.EntityPoint"
-})
+@SupportedOptions({"modName"})
 public class EntityProcessor extends BaseProcessor{
     Seq<TypeElement> comps = new Seq<>();
     Seq<TypeElement> baseComps = new Seq<>();
@@ -55,6 +50,17 @@ public class EntityProcessor extends BaseProcessor{
 
     {
         rounds = 3;
+    }
+
+    @Override
+    public Set<String> getSupportedAnnotationTypes() {
+        Set<String> types = new HashSet<>();
+        String prefix = processingEnv.getOptions().get("modName") + ".annotations.Annotations.";
+        types.add(prefix + "EntityComponent");
+        types.add(prefix + "EntityBaseComponent");
+        types.add(prefix + "EntityDef");
+        types.add(prefix + "EntityPoint");
+        return types;
     }
 
     @Override
@@ -645,7 +651,7 @@ public class EntityProcessor extends BaseProcessor{
                 definitions.add(new EntityDefinition(packageName + "." + name, builder, def, typeIsBase ? null : baseClass, defComps, defGroups, allFieldSpecs));
             }
         }else if(round == 3){
-            TypeSpec.Builder map = TypeSpec.classBuilder("TemplateEntityMapping").addModifiers(Modifier.PUBLIC)
+            TypeSpec.Builder map = TypeSpec.classBuilder(classPrefix + "EntityMapping").addModifiers(Modifier.PUBLIC)
                 .addField(
                     FieldSpec.builder(ParameterizedTypeName.get(
                         cName(ObjectIntMap.class),
@@ -677,7 +683,7 @@ public class EntityProcessor extends BaseProcessor{
                             ParameterizedTypeName.get(cName(Prov.class), tvName("T")),
                             "prov"
                         )
-                        .beginControlFlow("synchronized($T.class)", ClassName.get(packageName, "TemplateEntityMapping"))
+                        .beginControlFlow("synchronized($T.class)", ClassName.get(packageName, classPrefix + "EntityMapping"))
                             .addStatement("if(ids.containsKey(type) || $T.nameMap.containsKey(type.getSimpleName())) return", cName(EntityMapping.class))
                             .addCode(lnew())
                             .beginControlFlow("for(; last < $T.idMap.length; last++)", cName(EntityMapping.class))
@@ -759,7 +765,7 @@ public class EntityProcessor extends BaseProcessor{
                     MethodSpec.methodBuilder("classId").addModifiers(Modifier.PUBLIC)
                         .addAnnotation(cName(Override.class))
                         .returns(TypeName.INT)
-                        .addStatement("return $T.classId($T.class)", ClassName.get(packageName, "TemplateEntityMapping"), type)
+                        .addStatement("return $T.classId($T.class)", ClassName.get(packageName, classPrefix + "EntityMapping"), type)
                     .build()
                 );
 
@@ -839,7 +845,7 @@ public class EntityProcessor extends BaseProcessor{
                             result = MethodSpec.overriding(method).addStatement("return " + var).build();
                         }
 
-                        if(method.getReturnType().getKind() == VOID && !Seq.with(field.annotations).contains(f -> f.type.toString().equals("@template.annotations.Annotations.ReadOnly"))){
+                        if(method.getReturnType().getKind() == VOID && !Seq.with(field.annotations).contains(f -> f.type.toString().equals("@" + modName + ".annotations.Annotations.ReadOnly"))){
                             result = MethodSpec.overriding(method).addStatement("this." + var + " = " + var).build();
                         }
 

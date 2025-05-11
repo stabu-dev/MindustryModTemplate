@@ -39,7 +39,7 @@ public class AssetsProcessor extends BaseProcessor{
 
                     @Override
                     public String name(){
-                        return "TemplateSounds";
+                        return classPrefix + "Sounds";
                     }
 
                     @Override
@@ -65,7 +65,7 @@ public class AssetsProcessor extends BaseProcessor{
 
                     @Override
                     public String name(){
-                        return "TemplateMusics";
+                        return classPrefix + "Musics";
                     }
 
                     @Override
