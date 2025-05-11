@@ -1,16 +1,25 @@
 name: Java CI
 
-on: [push]
+on: [push, release]
 
 jobs:
   buildJar:
     name: Build and Publish Jar
     runs-on: ubuntu-latest
     permissions:
-      contents: write # for Update bundles
+      contents: write # for Update bundles and creating releases
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Get Mod Display Name for Artifacts
+        id: mod_details
+        run: |
+          raw_display_name=$(jq -r '.displayName' mod.json)
+          mod_file_name=$(echo "$raw_display_name" | tr -d ' ')
+          echo "MOD_FILE_NAME=${mod_file_name}" >> $GITHUB_ENV
+          echo "mod_file_name_output=${mod_file_name}" >> $GITHUB_OUTPUT
+          echo "Mod file name set to: ${mod_file_name}"
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -31,32 +40,41 @@ jobs:
 
       - name: Update bundles
         run: |
-           ./gradlew updateBundles
+          ./gradlew updateBundles
+          
+          if [ -n "$(git status --porcelain main/assets/bundles)" ]; then
+            git config --global user.name "Github Actions"
+            git config --global user.email "actions@github.com"
+            git add main/assets/bundles/*
+            git commit -m "Automatic bundle update"
+            git push
+          else
+            echo "No bundle changes to commit."
+          fi
 
-           if [ -n "$(git status --porcelain)" ]; then
-             git config --global user.name "Github Actions"
-             git config --global user.email "actions@github.com"
-             git add main/assets/bundles/*
-             git commit -m "Automatic bundle update"
-               git push
-             fi
-
-      - name: Build mod artifact
+      - name: Build mod artifacts (Desktop, Android, Process Assets)
         run: |
           chmod +x gradlew
-          ./gradlew main:deploy main:dex tools:proc
+          ./gradlew tools:proc main:deploy main:dex
 
-      - name: Upload built mod artifact as a GitHub Action artifact
+      - name: Upload built mod artifact (Android/Cross-platform)
         uses: actions/upload-artifact@v4
-        if: github.event_name == 'push' || github.event_name == 'pull_request'
         with:
-          name: Template (in a box)
-          path: main/build/libs/Template.jar
+          name: ${{ env.MOD_FILE_NAME }} (Android)
+          path: main/build/libs/${{ env.MOD_FILE_NAME }}.jar
           if-no-files-found: error
           compression-level: 0
 
-      - name: Upload built mod artifact into release
+      - name: Upload built mod artifact (Desktop)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.MOD_FILE_NAME }} (Desktop)
+          path: main/build/libs/${{ env.MOD_FILE_NAME }}Desktop.jar
+          if-no-files-found: error
+          compression-level: 0
+
+      - name: Upload built mod artifact into release (Android/Cross-platform)
         uses: softprops/action-gh-release@v2
         if: github.event_name == 'release' && github.event.action == 'created'
         with:
-          files: build/libs/Template.jar
+          files: main/build/libs/${{ steps.mod_details.outputs.mod_file_name_output }}.jar
