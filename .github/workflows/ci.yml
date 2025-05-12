@@ -62,7 +62,6 @@ jobs:
         id: build
         run: |
           chmod +x gradlew
-          # Запускаємо ті ж завдання, що й раніше. Вони створять JAR з іменем ${modDisplayName}.jar
           ./gradlew main:deploy main:dex tools:proc
 
       - name: Upload built mod artifact as a GitHub Action artifact
