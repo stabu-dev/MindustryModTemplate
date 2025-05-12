@@ -273,6 +273,17 @@ This produces a JAR compatible with both Android and PC (e.g., `MyAwesomeMod.jar
     }
     ```
 
+## Future Plans / TODO
+
+List of planned features and improvements for the template itself.
+
+*`🙏` - Planned, `🔃` - Working on It, `✅` - Done*
+
+| Status |                                                                                                                                                                              |
+| :----: |:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|   🙏   | Code Review & Cleanup: Fix inconsistencies, bugs, improve quality, and enhance documentation.                                                                                |
+|   🙏   | Expand Annotation Processors: Create generators (like `PrefixSounds`/`PrefixMusics`) for other things.                                                                       |
+|   🙏   | Automatic Text Icon Generation: Generate customizable text icons (custom, emoji) for content. <br/>Investigate vanilla copy integration (e.g., Shift+Click inside Database). |
 ## License
 
 This mod template is provided as a starting point and does not impose a specific license on your derivative work. You are free to choose the license for your mod.
