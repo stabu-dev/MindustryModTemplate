@@ -27,7 +27,7 @@ jobs:
           echo "dexed_jar_path=${DEXED_JAR_PATH}" >> $GITHUB_OUTPUT
           echo "dexed_jar_name=${DEXED_JAR_NAME}" >> $GITHUB_OUTPUT
           echo "artifact_name=${ARTIFACT_NAME}" >> $GITHUB_OUTPUT
-          echo "mod_display_name_clean=${MOD_DISPLAY_NAME_CLEAN}" >> $GITHUB_OUTPUT # Може знадобитись
+          echo "mod_display_name_clean=${MOD_DISPLAY_NAME_CLEAN}" >> $GITHUB_OUTPUT
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
