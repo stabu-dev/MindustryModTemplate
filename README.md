@@ -279,11 +279,13 @@ List of planned features and improvements for the template itself.
 
 *`🙏` - Planned, `🔃` - Working on It, `✅` - Done*
 
-| Status |                                                                                                                                                                                                |
-| :----: |:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|   🙏   | Code Review & Cleanup: Fix inconsistencies, bugs, improve quality, and enhance documentation.                                                                                                  |
-|   🙏   | Expand Annotation Processors: Create generators (like `PrefixSounds`/`PrefixMusics`) for other things.                                                                                         |
-|   🙏   | Automatic Text Icon Generation: Generate customizable text icons for content allowing to connect custom things. <br/>Investigate vanilla copy integration (e.g., Shift+Click inside Database). |
+| Status |                                                                                                                                                                                                        |
+|:------:|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|   🙏   | Code Review & Cleanup: Fix inconsistencies, bugs, improve quality, and enhance documentation.                                                                                                          |
+|   🙏   | Expand Annotation Processors: Create generators (like `PrefixSounds`/`PrefixMusics`) for other things.                                                                                                 |
+|   🙏   | Automatic Text Icon Generation: Generate customizable text icons for content + allowing to connect custom things to it. <br/>Investigate vanilla copy integration (e.g., Shift+Click inside Database). |
+|   🙏   | `run` task, which will perform `install` and run Mindustry with console output in to the IDE                                                                                                           |                                                                                                 |
+
 ## License
 
 This mod template is provided as a starting point and does not impose a specific license on your derivative work. You are free to choose the license for your mod.
