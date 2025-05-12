@@ -279,12 +279,12 @@ List of planned features and improvements for the template itself.
 
 *`🙏` - Planned, `🔃` - Working on It, `✅` - Done*
 
-| Status |                                                                                                                                                                    |
-|:------:|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|   🙏   | Fix inconsistencies, bugs, improve quality, and enhance documentation.                                                                                             |
-|   🙏   | Add more generating classes like `PrefixSounds`/`PrefixMusics` for other things.                                                                                   |
-|   🙏   | Add text icons generation for mod's content + allow to connect custom things to it. <br/>Investigate vanilla copy integration (e.g., Shift+Click inside Database). |
-|   🙏   | Add `run` task to run Mindustry with console output in to the IDE                                                                                                  |                                                                                                 |
+| Status |                                                                                                                                                                       |
+|:------:|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|   🙏   | Fix inconsistencies, bugs, improve quality, and enhance documentation.                                                                                                |
+|   🙏   | Add more generating classes like `PrefixSounds`/`PrefixMusics` for other things.                                                                                      |
+|   🙏   | Add text icon generation for mod content with support for custom icons (e.g., non-content). <br/>Investigate vanilla copy integration (e.g., Shift+Click inside Database). |
+|   🙏   | Add `run` task kinda like Mindustry's one                                                                                                                             |                                                                                                 |
 
 ## License
 
