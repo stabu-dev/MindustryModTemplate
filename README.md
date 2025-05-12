@@ -279,12 +279,12 @@ List of planned features and improvements for the template itself.
 
 *`🙏` - Planned, `🔃` - Working on It, `✅` - Done*
 
-| Status |                                                                                                                                                                                                        |
-|:------:|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|   🙏   | Code Review & Cleanup: Fix inconsistencies, bugs, improve quality, and enhance documentation.                                                                                                          |
-|   🙏   | Expand Annotation Processors: Create generators (like `PrefixSounds`/`PrefixMusics`) for other things.                                                                                                 |
-|   🙏   | Automatic Text Icon Generation: Generate customizable text icons for content + allowing to connect custom things to it. <br/>Investigate vanilla copy integration (e.g., Shift+Click inside Database). |
-|   🙏   | `run` task, which will perform `install` and run Mindustry with console output in to the IDE                                                                                                           |                                                                                                 |
+| Status |                                                                                                                                                                    |
+|:------:|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|   🙏   | Fix inconsistencies, bugs, improve quality, and enhance documentation.                                                                                             |
+|   🙏   | Add more generating classes like `PrefixSounds`/`PrefixMusics` for other things.                                                                                   |
+|   🙏   | Add text icons generation for mod's content + allow to connect custom things to it. <br/>Investigate vanilla copy integration (e.g., Shift+Click inside Database). |
+|   🙏   | Add `run` task to run Mindustry with console output in to the IDE                                                                                                  |                                                                                                 |
 
 ## License
 
