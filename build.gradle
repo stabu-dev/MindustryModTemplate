@@ -115,8 +115,14 @@ allprojects{
 import arc.files.Fi
 import arc.util.OS
 
-tasks.register('install', DefaultTask) {
+import java.nio.channels.Channels
+import java.nio.channels.FileChannel
+import java.nio.channels.ReadableByteChannel
+final def yellow = "\u001B[33m";
+final def green = "\u001B[32m";
+final def white = "\u001B[0m";
 
+tasks.register('install', DefaultTask) {
     final def mainProj = project(':main')
     final def deployJarProvider = mainProj.tasks.named('deploy', Jar).flatMap { it.archiveFile }
     final def mindustryPathProp = project.providers.gradleProperty('mindustryPath')
@@ -133,9 +139,9 @@ tasks.register('install', DefaultTask) {
         def modsDir
 
         if (customPath && !customPath.trim().isEmpty()) {
-            modsDir = Fi.get(customPath)
+            modsDir = Fi.get(customPath).child("Mindustry").child("mods")
         } else {
-            modsDir = Fi.get(OS.getAppDataDirectoryString("Mindustry")).child("mods")
+            modsDir = Fi.get(OS.getAppDataDirectoryString("Mindustry"+archivesBaseName)).child("Mindustry").child("mods")
         }
 
         modsDir.mkdirs()
@@ -147,6 +153,86 @@ tasks.register('install', DefaultTask) {
 
         Fi.get(jarFile as String).copyTo(modsDir)
 
-        logger.lifecycle("Сopied '${jarFile.name}' to '${modsDir.path()}'.")
+        logger.lifecycle("- Сopied '${jarFile.name}' to '${modsDir.path()}'.")
+    }
+}
+
+tasks.register('installClient', DefaultTask) {
+    final def mindustryPathProp = project.providers.gradleProperty('mindustryPath')
+    final def mindustryVersionProp = project.providers.gradleProperty('mindustryVersion')
+
+    doLast {
+        String customPath = mindustryPathProp.getOrNull()
+        def clientDir = customPath?.trim() ? Fi.get(customPath) : Fi.get(OS.getAppDataDirectoryString("Mindustry" + archivesBaseName))
+        String clientVersion = mindustryVersionProp.getOrElse("latest")
+        def clientFile = clientDir.child("client-${clientVersion}.jar")
+
+        if (clientFile.exists()) {
+            logger.lifecycle(yellow+"- Client is installed at '${clientFile.path()}'."+white)
+            return
+        }
+
+        clientDir.mkdirs()
+        clientFile.file().createNewFile();
+
+        String githubClientUrl = "https://github.com/Anuken/Mindustry/releases/download/${clientVersion}/Mindustry.jar"
+        logger.lifecycle(yellow+"> Downloading Mindustry ${clientVersion}..."+white)
+
+        URL url = new URL(githubClientUrl)
+        URLConnection connection = url.openConnection()
+        long contentLength = connection.contentLengthLong
+
+        InputStream input = connection.getInputStream()
+        FileOutputStream output = new FileOutputStream(clientFile.file())
+
+        byte[] buffer = new byte[8192]
+        long totalRead = 0
+        int bytesRead
+        int prevPercent = -1
+
+        while ((bytesRead = input.read(buffer)) != -1) {
+            output.write(buffer, 0, bytesRead)
+            totalRead += bytesRead
+
+            if (contentLength > 0) {
+                int percent = (int) ((totalRead * 100) / contentLength)
+                if (percent != prevPercent) {
+                    String bar = ('█' * (percent / 2)).padRight(50)
+                    String col = percent == 100 ? green : yellow;
+                    print "\r[${col}${bar}${white}] ${col}${percent}%${white}"
+                    System.out.flush()
+                    prevPercent = percent
+                }
+            }
+        }
+
+        input.close()
+        output.close()
+
+        logger.lifecycle("\n${white}- Installed to '${clientFile.path()}'.");
+    }
+}
+
+tasks.register('runClient', DefaultTask) {
+    dependsOn('installClient','install')
+    group = 'runs'
+    description = 'Deploys the mod to Mindustry and runs the client'
+
+    final def mindustryPathProp = project.providers.gradleProperty('mindustryPath')
+    final def mindustryVersionProp = project.providers.gradleProperty('mindustryVersion')
+
+    doLast {
+        String customPath = mindustryPathProp.getOrNull()
+        def clientDir = customPath?.trim() ? Fi.get(customPath) : Fi.get(OS.getAppDataDirectoryString("Mindustry" + archivesBaseName))
+        String clientVersion = mindustryVersionProp.getOrElse("latest")
+        def clientFile = clientDir.child("client-${clientVersion}.jar")
+
+        logger.lifecycle(green + "> Starting Mindustry." + white);
+
+        exec {
+            environment "APPDATA", clientDir.absolutePath()
+            environment "DEVELOPMENT", "true"
+            commandLine 'java', '-jar', clientFile.path(), "-debug"
+        }
     }
 }
