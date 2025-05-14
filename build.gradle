@@ -139,9 +139,9 @@ tasks.register('install', DefaultTask) {
         def modsDir
 
         if (customPath && !customPath.trim().isEmpty()) {
-            modsDir = Fi.get(customPath).child("Mindustry").child("mods")
+            modsDir = Fi.get(customPath).child("mods")
         } else {
-            modsDir = Fi.get(OS.getAppDataDirectoryString("Mindustry"+archivesBaseName)).child("Mindustry").child("mods")
+            modsDir = Fi.get(OS.getAppDataDirectoryString("Mindustry"+archivesBaseName)).child("mods")
         }
 
         modsDir.mkdirs()
@@ -230,7 +230,7 @@ tasks.register('runClient', DefaultTask) {
         logger.lifecycle(green + "> Starting Mindustry." + white);
 
         exec {
-            environment "APPDATA", clientDir.absolutePath()
+            environment "MINDUSTRY_DATA_DIR", clientDir.absolutePath()
             environment "DEVELOPMENT", "true"
             commandLine 'java', '-jar', clientFile.path(), "-debug"
         }
