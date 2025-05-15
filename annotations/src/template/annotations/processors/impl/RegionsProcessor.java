@@ -1,0 +1,81 @@
+package template.annotations.processors.impl;
+
+import arc.*;
+import arc.struct.*;
+import com.squareup.javapoet.*;
+import mindustry.ctype.*;
+import template.annotations.*;
+import template.annotations.Annotations.*;
+import template.annotations.processors.*;
+
+import javax.annotation.processing.*;
+import javax.lang.model.element.*;
+import java.util.*;
+
+/**
+ * Whenever a {@link arc.graphics.g2d.TextureRegion TextureRegion} is annotated with {@link Load},
+ * it'll generate a finder method inside the ContentRegionRegistry, which must be called for every
+ * content in ContentInitEvent
+ */
+public class RegionsProcessor extends BaseProcessor {
+	public ObjectMap<Element, Seq<Element>> annotated = new ObjectMap<>();
+
+	{
+		rounds = 1;
+	}
+
+	@Override
+	public Set<String> getSupportedAnnotationTypes() {
+		Set<String> types = new HashSet<>();
+		String prefix = processingEnv.getOptions().get("modName") + ".annotations.Annotations.";
+		types.add(prefix + "Load");
+		return types;
+	}
+
+	@Override
+	public void process(RoundEnvironment roundEnv) throws Exception {
+		if (round == 1) {
+			TypeSpec.Builder regionsClass = TypeSpec.classBuilder(classPrefix + "ContentRegionRegistry")
+			.addModifiers(Modifier.PUBLIC)
+			.addJavadoc("Class generated for loading regions annotated with {@link template.annotations.Annotations.Load load}");
+
+			MethodSpec.Builder loadMethod = MethodSpec.methodBuilder("load")
+			.addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+			.addParameter(tName(MappableContent.class), "content");
+
+			for (Element element : roundEnv.getElementsAnnotatedWith(Load.class)) {
+				annotated.get(element.getEnclosingElement(), Seq::new).add(element);
+			}
+
+			for (Element base : annotated.keys().toSeq()) {
+				loadMethod.beginControlFlow("if (content instanceof $T)", cName(base));
+
+				for (Element field : annotated.get(base)) {
+					Load annotation = field.getAnnotation(Load.class);
+
+					loadMethod.addStatement(
+						"(($T) content).$L = $T.atlas.find($S, $S)",
+						cName(base),
+						field.getSimpleName(),
+						cName(Core.class),
+						parse(annotation.value()),
+						parse(annotation.fallBack())
+					);
+				}
+
+				loadMethod.endControlFlow();
+			}
+
+			regionsClass.addMethod(loadMethod.build());
+
+			write(regionsClass.build());
+		}
+	}
+
+	public String parse(String other) {
+		return other
+		.replace("@modname", modName)
+		.replace("@size", "\" + ((mindustry.world.Block) content).size + \"")
+		.replace("@", "\" + content.name + \"");
+	}
+}

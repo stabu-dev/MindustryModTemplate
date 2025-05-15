@@ -467,6 +467,31 @@ public class Annotations{
         int outlineRadius() default 4;
     }
 
+		/**
+		 * Fields annotated with this will be put on the ContentRegionRegistry, separated by enclosing class.
+     * Names are parsed based on the following:
+		 * <p> @ -> block name(modname included)
+		 * <p> @modname -> mod name
+		 * <p> @size -> block size
+		 * <p> #, #1, #2 -> index number, for arrays
+		 */
+		@Target(ElementType.FIELD)
+		@Retention(RetentionPolicy.SOURCE)
+		public @interface Load {
+				/**
+				 * Name used by the region
+				 */
+				String value();
+				/**
+				 * Array lengths. One value for each dimension
+				 */
+				int[] lengths() default {};
+				/**
+				 * Name used by the region if {@link #value()} returns error
+				 */
+				String fallBack() default "error";
+		}
+
     //anuke's implementation of annotation proxy maker, to replace the broken one from oracle
     //thanks, anuke
     //damn you, oracle

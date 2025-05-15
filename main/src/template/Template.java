@@ -3,6 +3,7 @@ package template;
 import arc.*;
 import arc.util.*;
 
+import mindustry.*;
 import mindustry.ctype.*;
 import mindustry.game.EventType.*;
 import mindustry.mod.*;
@@ -53,6 +54,11 @@ public class Template extends Mod{
         Events.on(ContentInitEvent.class, e -> {
             if(!headless){
                 Regions.load();
+                Vars.content.each(content -> {
+                    if (isTemplate(content) && content instanceof MappableContent mContent) {
+                        TemplateContentRegionRegistry.load(mContent);
+                    }
+                });
             }
         });
     }
