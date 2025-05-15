@@ -5,18 +5,18 @@ import arc.graphics.g2d.*;
 import arc.struct.*;
 import com.squareup.javapoet.*;
 import mindustry.ctype.*;
-import template.annotations.*;
 import template.annotations.Annotations.*;
 import template.annotations.processors.*;
 
 import javax.annotation.processing.*;
 import javax.lang.model.element.*;
+import javax.lang.model.type.*;
 import java.util.*;
 
 /**
- * Whenever a {@link arc.graphics.g2d.TextureRegion TextureRegion} is annotated with {@link Load},
+ * Whenever a {@link arc.graphics.g2d.TextureRegion TextureRegion} is annotated with {@link Load @Load},
  * it'll generate a finder method inside the ContentRegionRegistry, which must be called for every
- * content in ContentInitEvent
+ * content in {@link mindustry.game.EventType.ContentInitEvent ContentInitEvent}
  */
 public class RegionsProcessor extends BaseProcessor {
 	public ObjectMap<Element, Seq<Element>> annotated = new ObjectMap<>();
@@ -45,10 +45,22 @@ public class RegionsProcessor extends BaseProcessor {
 			.addParameter(tName(MappableContent.class), "content");
 
 			for (Element element : roundEnv.getElementsAnnotatedWith(Load.class)) {
+				TypeMirror type = element.asType();
+				while (type.getKind() == TypeKind.ARRAY) {
+					type = ((ArrayType) type).getComponentType();
+				}
+				if (!types.isSameType(type, toType(TextureRegion.class).asType())) {
+					throw new IllegalAccessException("Only TextureRegions should be annotated with @Load");
+				}
+
 				annotated.get(element.getEnclosingElement(), Seq::new).add(element);
 			}
 
 			for (Element base : annotated.keys().toSeq()) {
+				if (!types.isSameType(base.asType(), toType(MappableContent.class).asType())) {
+					throw new IllegalAccessException("@Load annotated TextureRegions must have a MappableContent enclosing class");
+				}
+
 				loadMethod.beginControlFlow("if (content instanceof $T)", cName(base));
 
 				for (Element field : annotated.get(base)) {
@@ -95,6 +107,6 @@ public class RegionsProcessor extends BaseProcessor {
 		.replace("@size", "\" + ((mindustry.world.Block) content).size + \"")
 		.replace("@", "\" + content.name + \"")
 		.replace("#", "\" + INDEX")
-		.replace("$", "+ \"");
+		.replace("$", " + \"");
 	}
 }

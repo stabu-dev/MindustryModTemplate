@@ -1,6 +1,7 @@
 package template.annotations;
 
 import arc.func.*;
+import arc.graphics.g2d.*;
 import arc.struct.*;
 import com.squareup.javapoet.*;
 import com.sun.tools.javac.code.*;
@@ -469,21 +470,20 @@ public class Annotations{
 
 		/**
 		 * Fields annotated with this will be put on the ContentRegionRegistry, separated by enclosing class.
-     * Names are parsed based on the following:
-     * <ul>
-     *   <p> @ -> content name(modname included)
-     *   <p> @modname -> mod name
-     *   <p> @size -> block size
-     *   <p> #0$, #1$, #2$ -> index number, for arrays
-     *   <ul>
-     *     <p> # -> INDEX, but the following numbers can determine which dimension of the array this comes from. Starts at 0 and
-     *     any value after # will be appended right next to it
-     *     <p> $ Is required so that the annotation processor knows when the array variable ends.
-     *   </ul>
-     * </ul>
-     *
-     * <p> This annotation is meant to be used only with {@link arc.graphics.g2d.TextureRegion TextureRegion} fields whose enclosing class is
-     * an instance of {@link mindustry.ctype.MappableContent}
+		 * Names are parsed based on the following:
+		 * <ul>
+		 * <p> @ -> content name(modname included)
+		 * <p> @modname -> mod name
+		 * <p> @size -> block size
+		 * <p> #0$, #1$, #2$ -> index number, for arrays
+		 * <ul>
+		 * <p> # -> INDEX, but the following numbers can determine which dimension of the array this comes from. Starts at 0 and
+		 * any value after # will be appended right next to it
+		 * <p> $ Is required so that the annotation processor knows when the array variable ends.
+		 * </ul>
+		 * </ul>
+		 * <p> Will throw an {@link IllegalArgumentException} if this annotation is used outside a {@link TextureRegion TextureRegion} field whose enclosing class is
+		 * an instance of {@link mindustry.ctype.MappableContent MappableContent}
 		 */
 		@Target(ElementType.FIELD)
 		@Retention(RetentionPolicy.SOURCE)
