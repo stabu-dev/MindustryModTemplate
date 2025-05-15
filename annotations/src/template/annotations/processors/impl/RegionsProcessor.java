@@ -1,6 +1,7 @@
 package template.annotations.processors.impl;
 
 import arc.*;
+import arc.graphics.g2d.*;
 import arc.struct.*;
 import com.squareup.javapoet.*;
 import mindustry.ctype.*;
@@ -53,14 +54,29 @@ public class RegionsProcessor extends BaseProcessor {
 				for (Element field : annotated.get(base)) {
 					Load annotation = field.getAnnotation(Load.class);
 
+					StringBuilder depth = new StringBuilder();
+					for (int i = 0; i < annotation.lengths().length; i++) {
+						loadMethod.beginControlFlow(
+							"for (int INDEX$L = 0; INDEX$L < $L; INDEX$L++)",
+							i, i, annotation.lengths()[i], i
+						);
+
+						depth.append("[INDEX").append(i).append("]");
+					}
+
 					loadMethod.addStatement(
-						"(($T) content).$L = $T.atlas.find($S, $S)",
+						"(($T) content).$L$L = $T.atlas.find($L, $L)",
 						cName(base),
 						field.getSimpleName(),
+						depth.toString(),
 						cName(Core.class),
 						parse(annotation.value()),
 						parse(annotation.fallBack())
 					);
+
+					for (int i = 0; i < annotation.lengths().length; i++) {
+						loadMethod.endControlFlow();
+					}
 				}
 
 				loadMethod.endControlFlow();
@@ -73,9 +89,12 @@ public class RegionsProcessor extends BaseProcessor {
 	}
 
 	public String parse(String other) {
+		other = '"' + other + '"';
 		return other
 		.replace("@modname", modName)
 		.replace("@size", "\" + ((mindustry.world.Block) content).size + \"")
-		.replace("@", "\" + content.name + \"");
+		.replace("@", "\" + content.name + \"")
+		.replace("#", "\" + INDEX")
+		.replace("$", "+ \"");
 	}
 }
