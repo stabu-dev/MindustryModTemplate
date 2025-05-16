@@ -477,9 +477,10 @@ public class Annotations{
 		 * <p> @size -> block size
 		 * <p> #0$, #1$, #2$ -> index number, for arrays
 		 * <ul>
-		 * <p> # -> INDEX, but the following numbers can determine which dimension of the array this comes from. Starts at 0 and
-		 * any value after # will be appended right next to it
+		 * <p> # -> INDEX, Regular prefix for array variable. Number suffix starts at 0 for each dimension of array.
+     * <P> The following characters up to an $ are appended right after INDEX without being separated by a string
 		 * <p> $ Is required so that the annotation processor knows when the array variable ends.
+     * <p> Examples: #$ -> INDEX, #0$ ->  INDEX0, #1$ ->  INDEX1, #2$ ->  INDEX2
 		 * </ul>
 		 * </ul>
 		 * <p> Will throw an {@link IllegalArgumentException} if this annotation is used outside a {@link TextureRegion TextureRegion} field whose enclosing class is
@@ -501,6 +502,11 @@ public class Annotations{
 				 */
 				String fallBack() default "error";
 		}
+    /**
+     * Ensures that the ContentRegionRegistry is generated.
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface EnsureLoad{}
 
     //anuke's implementation of annotation proxy maker, to replace the broken one from oracle
     //thanks, anuke

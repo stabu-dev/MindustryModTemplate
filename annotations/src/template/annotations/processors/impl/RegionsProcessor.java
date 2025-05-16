@@ -3,6 +3,7 @@ package template.annotations.processors.impl;
 import arc.*;
 import arc.graphics.g2d.*;
 import arc.struct.*;
+import arc.util.*;
 import com.squareup.javapoet.*;
 import mindustry.ctype.*;
 import template.annotations.Annotations.*;
@@ -30,6 +31,7 @@ public class RegionsProcessor extends BaseProcessor {
 		Set<String> types = new HashSet<>();
 		String prefix = processingEnv.getOptions().get("modName") + ".annotations.Annotations.";
 		types.add(prefix + "Load");
+		types.add(prefix + "EnsureLoad");
 		return types;
 	}
 

@@ -18,7 +18,8 @@ import static mindustry.Vars.*;
  * The mod's main mod class. Contains static references to other modules.
  * @author Avant Team
  */
-@LoadRegs("error") // Need this temporarily, so the class gets generated.
+@LoadRegs("error")// Need this temporarily, so the class gets generated.
+@EnsureLoad
 public class Template extends Mod{
     public static boolean tools = false;
 
