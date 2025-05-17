@@ -1,6 +1,7 @@
 package template.annotations;
 
 import arc.func.*;
+import arc.graphics.g2d.*;
 import arc.struct.*;
 import com.squareup.javapoet.*;
 import com.sun.tools.javac.code.*;
@@ -466,6 +467,46 @@ public class Annotations{
         /** @return The outline radius, only valid if {@link #outline()} is true */
         int outlineRadius() default 4;
     }
+
+		/**
+		 * Fields annotated with this will be put on the ContentRegionRegistry, separated by enclosing class.
+		 * Names are parsed based on the following:
+		 * <ul>
+		 * <p> @ -> content name(modname included)
+		 * <p> @modname -> mod name
+		 * <p> @size -> block size
+		 * <p> #0$, #1$, #2$ -> index number, for arrays
+		 * <ul>
+		 * <p> # -> INDEX, Regular prefix for array variable. Number suffix starts at 0 for each dimension of array.
+     * <P> The following characters up to an $ are appended right after INDEX without being separated by a string
+		 * <p> $ Is required so that the annotation processor knows when the array variable ends.
+     * <p> Examples: #$ -> INDEX, #0$ ->  INDEX0, #1$ ->  INDEX1, #2$ ->  INDEX2
+		 * </ul>
+		 * </ul>
+		 * <p> Will throw an {@link IllegalArgumentException} if this annotation is used outside a {@link TextureRegion TextureRegion} field whose enclosing class is
+		 * an instance of {@link mindustry.ctype.MappableContent MappableContent}
+		 */
+		@Target(ElementType.FIELD)
+		@Retention(RetentionPolicy.SOURCE)
+		public @interface Load {
+				/**
+				 * Name used by the region
+				 */
+				String value();
+				/**
+				 * Array lengths. One value for each dimension
+				 */
+				int[] lengths() default {};
+				/**
+				 * Name used by the region if {@link #value()} returns error
+				 */
+				String fallBack() default "error";
+		}
+    /**
+     * Ensures that the ContentRegionRegistry is generated.
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface EnsureLoad{}
 
     //anuke's implementation of annotation proxy maker, to replace the broken one from oracle
     //thanks, anuke

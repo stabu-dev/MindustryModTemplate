@@ -3,6 +3,7 @@ package template;
 import arc.*;
 import arc.util.*;
 
+import mindustry.*;
 import mindustry.ctype.*;
 import mindustry.game.EventType.*;
 import mindustry.mod.*;
@@ -17,7 +18,8 @@ import static mindustry.Vars.*;
  * The mod's main mod class. Contains static references to other modules.
  * @author Avant Team
  */
-@LoadRegs("error") // Need this temporarily, so the class gets generated.
+@LoadRegs("error")// Need this temporarily, so the class gets generated.
+@EnsureLoad
 public class Template extends Mod{
     public static boolean tools = false;
 
@@ -53,6 +55,11 @@ public class Template extends Mod{
         Events.on(ContentInitEvent.class, e -> {
             if(!headless){
                 Regions.load();
+                Vars.content.each(content -> {
+                    if (isTemplate(content) && content instanceof MappableContent mContent) {
+                        TemplateContentRegionRegistry.load(mContent);
+                    }
+                });
             }
         });
     }
