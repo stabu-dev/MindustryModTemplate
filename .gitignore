@@ -6,6 +6,8 @@ build/
 .project
 .classpath
 
+run/
+
 # Project
 main/assets/sprites/
 
