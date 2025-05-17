@@ -36,7 +36,11 @@ Before diving in, a good understanding of Java and Git is **highly recommended**
         *   `main`: The fully qualified name of your main mod class (e.g., `myawesomemod.MyAwesomeMod`).
     *   **`gradle.properties`:**
         *   `classPrefix`: A prefix for certain generated Java classes (like `YourPrefixSounds.java`, `YourPrefixEntityMapping.java`). If left empty, it defaults to your `displayName` from `mod.json` (with spaces removed). For example, if `displayName` is "My Awesome Mod", `classPrefix` would default to `MyAwesomeMod`.
-        *   `mindustryPath` (Optional): If you want the `./gradlew install` task to copy the built mod to a custom Mindustry mods directory, specify the path here. Leave empty for automatic detection.
+        *   `mindustryPath` (Optional): Path to your Mindustry installation directory.
+            *   If this path points to a Steam Mindustry installation (containing `Mindustry.exe`), tasks like `install`, `installClient`, and `runClient` will correctly target its subdirectories (e.g., `saves/mods/`).
+            *   If set to a non-Steam directory, these tasks will use a `mods` subdirectory within it (e.g. `[mindustryPath]/mods/`).
+            *   If left empty, tasks default to using a `run/` directory within your project's root (e.g., `[projectDir]/run/mods/` for `install`, `[projectDir]/run/client-[version].jar` for `installClient`). This `run/` directory will be created if it doesn't exist.
+        *   `mindustryVersion`: The version of Mindustry client to download for the `installClient` and `runClient` tasks (e.g., `v146`). This should match a release tag on Mindustry's GitHub repository.
     *   **Java Source Files:**
         *   Rename the default package `template` in `main/src/` (e.g., to `myawesomemod` if your `mod.json` `name` is `my-awesome-mod`).
         *   Rename the main mod class `main/src/(your-new-package-name)/Template.java` to your desired class name (e.g., `MyAwesomeMod.java`).
@@ -178,6 +182,11 @@ Ideal for quick testing on PC. The resulting JAR will have `Desktop` appended (e
     ```
     You can combine these: `./gradlew main:deploy install`.
 
+    For a complete build, install, and launch cycle for testing (will download Mindustry client if needed and not a Steam install):
+    ```bash
+    ./gradlew runClient
+    ```
+
 ### Android Build (Cross-Platform)
 
 This produces a JAR compatible with both Android and PC (e.g., `MyAwesomeMod.jar`).
@@ -215,7 +224,21 @@ This produces a JAR compatible with both Android and PC (e.g., `MyAwesomeMod.jar
 
 *   `main:deploy`: Builds the desktop-only JAR (e.g., `YourModDisplayNameDesktop.jar`).
 *   `main:dex`: Builds the Android-compatible (cross-platform) JAR (e.g., `YourModDisplayName.jar`).
-*   `install`: Copies the `main:deploy` output (desktop JAR) to the local Mindustry mods folder.
+*   `install`: Copies the `main:deploy` output (desktop JAR) to the local Mindustry mods folder. The target directory depends on the `mindustryPath` property in `gradle.properties`:
+    *   `[mindustryPath]/saves/mods/` if `mindustryPath` points to a Steam installation (contains `Mindustry.exe`).
+    *   `[mindustryPath]/mods/` if `mindustryPath` points to a non-Steam directory.
+    *   `[projectDir]/run/mods/` if `mindustryPath` is not set (where `[projectDir]` is your mod's root directory).
+*   `installClient`: Downloads the Mindustry client JAR (version specified by `mindustryVersion` property in `gradle.properties`) into the directory determined by `mindustryPath` (or `[projectDir]/run/` if `mindustryPath` is unset).
+    *   This task is skipped if the target path appears to be a Steam Mindustry installation (contains `Mindustry.exe`).
+    *   Primarily used by the `runClient` task to ensure a Mindustry client is available for testing.
+*   `runClient`: A comprehensive task to test your mod locally. It performs the following sequence:
+    1.  Ensures the Mindustry client is available by running `installClient` (unless it's a Steam setup).
+    2.  Builds and installs your mod by running `install`.
+    3.  Launches Mindustry with your mod:
+        *   If the target path (from `mindustryPath` or defaulting to `[projectDir]/run/`) is a Steam installation, it runs `Mindustry.exe`.
+        *   Otherwise, it runs the client JAR (e.g., `client-[mindustryVersion].jar`) using `java -jar ... -debug`.
+            *   **Note:** When launching the non-Steam client JAR this way, Mindustry's console output will be displayed directly in your IDE/terminal. This is not possible with the Steam version due to how Steam launches applications.
+    *   Sets `MINDUSTRY_DATA_DIR` to the appropriate data/saves directory and `DEVELOPMENT=true` environment variables for the game instance.
 *   `tools:proc`: Runs the asset processing pipeline (defined in the `tools` module), processing files from `main/assets-raw/` to `main/assets/`.
 *   `main:fetchComps`: Downloads and adapts Mindustry's core entity components into a temporary build directory for compilation.
 *   `updateBundles`: Synchronizes localization files in `main/assets/bundles/` based on `bundle.properties`. Changes are automatically committed and pushed by the CI workflow if changes are detected.
@@ -256,12 +279,12 @@ List of planned features and improvements for the template itself.
 
 *`🙏` - Planned, `🔃` - Working on It, `✅` - Done*
 
-| Status |                                                                                                                                                                       |
-|:------:|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|   🙏   | Fix inconsistencies, bugs, improve quality, and enhance documentation.                                                                                                |
-|   🙏   | Add more generating classes like `PrefixSounds`/`PrefixMusics` for other things.                                                                                      |
+| Status |                                                                                                                                                                            |
+|:------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|   🙏   | Fix inconsistencies, bugs, improve quality, and enhance documentation.                                                                                                     |
+|   🙏   | Add more generating classes like `PrefixSounds`/`PrefixMusics` for other things.                                                                                           |
 |   🙏   | Add text icon generation for mod content with support for custom icons (e.g., non-content). <br/>Investigate vanilla copy integration (e.g., Shift+Click inside Database). |
-|   🙏   | Add `run` task kinda like Mindustry's one                                                                                                                             |                                                                                                 |
+|   ✅   | Add `run` task kinda like Mindustry's one (`runClient`).                                                                                                                   |
 
 ## License
 

@@ -171,7 +171,7 @@ tasks.register('installClient', DefaultTask) {
             return
         }
 
-        String clientVersion = mindustryVersionProp.getOrElse("latest")
+        String clientVersion = mindustryVersionProp
         def clientFile = mindustryPath.child("client-${clientVersion}.jar")
 
         if (clientFile.exists()) {
@@ -217,13 +217,11 @@ tasks.register('installClient', DefaultTask) {
 }
 
 tasks.register('runClient', DefaultTask) {
-    dependsOn('installClient','install')
-    group = 'runs'
-    description = 'Deploys the mod to Mindustry and runs the client'
+    dependsOn 'installClient','install'
 
     final def mindustryPathProp = project.providers.gradleProperty('mindustryPath')
     final def mindustryVersionProp = project.providers.gradleProperty('mindustryVersion')
-    final def defaultMinPath = new File(project.projectDir,"run").getAbsolutePath();
+    final def defaultMinPath = new File(project.projectDir,"run").absolutePath
 
     doLast {
         String customPath = mindustryPathProp.getOrNull()
@@ -234,7 +232,7 @@ tasks.register('runClient', DefaultTask) {
         def mindustrySaves = mindustryPath
         if(isSteam) mindustrySaves = mindustrySaves.child("saves")
 
-        String clientVersion = mindustryVersionProp.getOrElse("latest")
+        String clientVersion = mindustryVersionProp
         def clientFile = mindustryPath.child("client-${clientVersion}.jar")
         if(isSteam) clientFile = mindustryPath.child("Mindustry.exe")
 
