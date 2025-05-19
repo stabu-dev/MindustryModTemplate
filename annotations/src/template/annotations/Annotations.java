@@ -176,14 +176,14 @@ public class Annotations{
         enum FloatPacker{
             /** Default. Takes all 32 bits */
             def(32,
-                f -> "Float.floatToIntBits(" + f + ")",
-                f -> "Float.intBitsToFloat(" + f + ")"
+                    f -> "Float.floatToIntBits(" + f + ")",
+                    f -> "Float.intBitsToFloat(" + f + ")"
             ),
 
             /** RGBA8888 color format. Takes 8 bits for typically 4 floats each */
             rgba8888(8,
-                f -> "(" + f + " * 255f)",
-                f -> "(" + f + " / 255f)"
+                    f -> "(" + f + " * 255f)",
+                    f -> "(" + f + " / 255f)"
             );
 
             public final int size;
@@ -468,40 +468,41 @@ public class Annotations{
         int outlineRadius() default 4;
     }
 
-		/**
-		 * Fields annotated with this will be put on the ContentRegionRegistry, separated by enclosing class.
-		 * Names are parsed based on the following:
-		 * <ul>
-		 * <p> @ -> content name(modname included)
-		 * <p> @modname -> mod name
-		 * <p> @size -> block size
-		 * <p> #0$, #1$, #2$ -> index number, for arrays
-		 * <ul>
-		 * <p> # -> INDEX, Regular prefix for array variable. Number suffix starts at 0 for each dimension of array.
-     * <P> The following characters up to an $ are appended right after INDEX without being separated by a string
-		 * <p> $ Is required so that the annotation processor knows when the array variable ends.
-     * <p> Examples: #$ -> INDEX, #0$ ->  INDEX0, #1$ ->  INDEX1, #2$ ->  INDEX2
-		 * </ul>
-		 * </ul>
-		 * <p> Will throw an {@link IllegalArgumentException} if this annotation is used outside a {@link TextureRegion TextureRegion} field whose enclosing class is
-		 * an instance of {@link mindustry.ctype.MappableContent MappableContent}
-		 */
-		@Target(ElementType.FIELD)
-		@Retention(RetentionPolicy.SOURCE)
-		public @interface Load {
-				/**
-				 * Name used by the region
-				 */
-				String value();
-				/**
-				 * Array lengths. One value for each dimension
-				 */
-				int[] lengths() default {};
-				/**
-				 * Name used by the region if {@link #value()} returns error
-				 */
-				String fallBack() default "error";
-		}
+    /**
+     * Fields annotated with this will be put on the ContentRegionRegistry, separated by enclosing class.
+     * Names are parsed based on the following:
+     * <ul>
+     * <li>@ -> content name(modname included)</li>
+     * <li>@modname -> mod name</li>
+     * <li>@size -> block size</li>
+     * <li>#0$, #1$, #2$ -> index number, for arrays
+     *   <ul>
+     *   <li># -> INDEX, Regular prefix for array variable. Number suffix starts at 0 for each dimension of array.</li>
+     *   <li>The following characters up to an $ are appended right after INDEX without being separated by a string</li>
+     *   <li>$ Is required so that the annotation processor knows when the array variable ends.</li>
+     *   <li>Examples: #$ -> INDEX, #0$ ->  INDEX0, #1$ ->  INDEX1, #2$ ->  INDEX2</li>
+     *   </ul>
+     * </li>
+     * </ul>
+     * Will throw an {@link IllegalArgumentException} if this annotation is used outside a {@link TextureRegion TextureRegion} field whose enclosing class is
+     * an instance of {@link mindustry.ctype.MappableContent MappableContent}.
+     */
+    @Target(ElementType.FIELD)
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Load{
+        /**
+         * Name used by the region
+         */
+        String value();
+        /**
+         * Array lengths. One value for each dimension
+         */
+        int[] lengths() default {};
+        /**
+         * Name used by the region if {@link #value()} returns error
+         */
+        String fallBack() default "error";
+    }
     /**
      * Ensures that the ContentRegionRegistry is generated.
      */
@@ -703,7 +704,6 @@ public class Annotations{
                 }catch(ClassCastException var3){
                     this.value = null;
                 }
-
             }
 
             @Override

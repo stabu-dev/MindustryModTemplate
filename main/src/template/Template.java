@@ -2,13 +2,10 @@ package template;
 
 import arc.*;
 import arc.util.*;
-
-import mindustry.*;
 import mindustry.ctype.*;
 import mindustry.game.EventType.*;
 import mindustry.mod.*;
 import mindustry.ui.dialogs.*;
-
 import template.annotations.Annotations.*;
 import template.gen.*;
 
@@ -49,14 +46,13 @@ public class Template extends Mod{
                     dialog.show();
                 });
             });
-
         }
 
         Events.on(ContentInitEvent.class, e -> {
             if(!headless){
                 Regions.load();
-                Vars.content.each(content -> {
-                    if (isTemplate(content) && content instanceof MappableContent mContent) {
+                content.each(content -> {
+                    if(isTemplate(content) && content instanceof MappableContent mContent){
                         TemplateContentRegionRegistry.load(mContent);
                     }
                 });

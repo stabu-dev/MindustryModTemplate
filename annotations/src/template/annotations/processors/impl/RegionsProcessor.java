@@ -3,7 +3,6 @@ package template.annotations.processors.impl;
 import arc.*;
 import arc.graphics.g2d.*;
 import arc.struct.*;
-import arc.util.*;
 import com.squareup.javapoet.*;
 import mindustry.ctype.*;
 import template.annotations.Annotations.*;
@@ -19,7 +18,7 @@ import java.util.*;
  * it'll generate a finder method inside the ContentRegionRegistry, which must be called for every
  * content in {@link mindustry.game.EventType.ContentInitEvent ContentInitEvent}
  */
-public class RegionsProcessor extends BaseProcessor {
+public class RegionsProcessor extends BaseProcessor{
 	public ObjectMap<Element, Seq<Element>> annotated = new ObjectMap<>();
 
 	{
@@ -27,7 +26,7 @@ public class RegionsProcessor extends BaseProcessor {
 	}
 
 	@Override
-	public Set<String> getSupportedAnnotationTypes() {
+	public Set<String> getSupportedAnnotationTypes(){
 		Set<String> types = new HashSet<>();
 		String prefix = processingEnv.getOptions().get("modName") + ".annotations.Annotations.";
 		types.add(prefix + "Load");
@@ -36,59 +35,56 @@ public class RegionsProcessor extends BaseProcessor {
 	}
 
 	@Override
-	public void process(RoundEnvironment roundEnv) throws Exception {
-		if (round == 1) {
+	public void process(RoundEnvironment roundEnv) throws Exception{
+		if(round == 1){
 			TypeSpec.Builder regionsClass = TypeSpec.classBuilder(classPrefix + "ContentRegionRegistry")
-			.addModifiers(Modifier.PUBLIC)
-			.addJavadoc("Class generated for loading regions annotated with {@link template.annotations.Annotations.Load load}");
+					.addModifiers(Modifier.PUBLIC)
+					.addJavadoc("Class generated for loading regions annotated with {@link template.annotations.Annotations.Load load}");
 
 			MethodSpec.Builder loadMethod = MethodSpec.methodBuilder("load")
-			.addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-			.addParameter(tName(MappableContent.class), "content");
+					.addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+					.addParameter(tName(MappableContent.class), "content");
 
-			for (Element element : roundEnv.getElementsAnnotatedWith(Load.class)) {
+			for(Element element : roundEnv.getElementsAnnotatedWith(Load.class)){
 				TypeMirror type = element.asType();
-				while (type.getKind() == TypeKind.ARRAY) {
-					type = ((ArrayType) type).getComponentType();
+				while(type.getKind() == TypeKind.ARRAY){
+					type = ((ArrayType)type).getComponentType();
 				}
-				if (!types.isSameType(type, toType(TextureRegion.class).asType())) {
+				if(!types.isSameType(type, toType(TextureRegion.class).asType())){
 					throw new IllegalAccessException("Only TextureRegions should be annotated with @Load");
 				}
 
 				annotated.get(element.getEnclosingElement(), Seq::new).add(element);
 			}
 
-			for (Element base : annotated.keys().toSeq()) {
-				if (!types.isSameType(base.asType(), toType(MappableContent.class).asType())) {
-					throw new IllegalAccessException("@Load annotated TextureRegions must have a MappableContent enclosing class");
-				}
+			for(Element base : annotated.keys().toSeq()){
 
-				loadMethod.beginControlFlow("if (content instanceof $T)", cName(base));
+				loadMethod.beginControlFlow("if(content instanceof $T)", cName(base));
 
-				for (Element field : annotated.get(base)) {
+				for(Element field : annotated.get(base)){
 					Load annotation = field.getAnnotation(Load.class);
 
 					StringBuilder depth = new StringBuilder();
-					for (int i = 0; i < annotation.lengths().length; i++) {
+					for(int i = 0; i < annotation.lengths().length; i++){
 						loadMethod.beginControlFlow(
-							"for (int INDEX$L = 0; INDEX$L < $L; INDEX$L++)",
-							i, i, annotation.lengths()[i], i
+								"for(int INDEX$L = 0; INDEX$L < $L; INDEX$L++)",
+								i, i, annotation.lengths()[i], i
 						);
 
 						depth.append("[INDEX").append(i).append("]");
 					}
 
 					loadMethod.addStatement(
-						"(($T) content).$L$L = $T.atlas.find($L, $L)",
-						cName(base),
-						field.getSimpleName(),
-						depth.toString(),
-						cName(Core.class),
-						parse(annotation.value()),
-						parse(annotation.fallBack())
+							"(($T)content).$L$L = $T.atlas.find($L, $L)",
+							cName(base),
+							field.getSimpleName(),
+							depth.toString(),
+							cName(Core.class),
+							parse(annotation.value()),
+							parse(annotation.fallBack())
 					);
 
-					for (int i = 0; i < annotation.lengths().length; i++) {
+					for(int i = 0; i < annotation.lengths().length; i++){
 						loadMethod.endControlFlow();
 					}
 				}
@@ -102,13 +98,13 @@ public class RegionsProcessor extends BaseProcessor {
 		}
 	}
 
-	public String parse(String other) {
+	public String parse(String other){
 		other = '"' + other + '"';
 		return other
-		.replace("@modname", modName)
-		.replace("@size", "\" + ((mindustry.world.Block) content).size + \"")
-		.replace("@", "\" + content.name + \"")
-		.replace("#", "\" + INDEX")
-		.replace("$", " + \"");
+				.replace("@modname", modName)
+				.replace("@size", "\" + ((mindustry.world.Block)content).size + \"")
+				.replace("@", "\" + content.name + \"")
+				.replace("#", "\" + INDEX")
+				.replace("$", " + \"");
 	}
 }
