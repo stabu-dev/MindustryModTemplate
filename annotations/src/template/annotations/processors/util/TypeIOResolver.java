@@ -38,7 +38,7 @@ public class TypeIOResolver{
     }
 
     private static String fix(String str){
-        return str.replace("mindustry.gen", "").replace(modName + ".gen", "");
+        return str.replace("mindustry.gen", "").replace(BaseProcessor.sanitizedModName + ".gen", "");
     }
 
     /** Information about read/write methods for class types. */

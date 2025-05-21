@@ -29,11 +29,10 @@ public class StructProcessor extends BaseProcessor{
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {
-        Set<String> types = new HashSet<>();
-        String prefix = processingEnv.getOptions().get("modName") + ".annotations.Annotations.";
-        types.add(prefix + "Struct");
-        types.add(prefix + "StructWrap");
-        return types;
+        return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+                Struct.class.getCanonicalName(),
+                StructWrap.class.getCanonicalName()
+        )));
     }
 
     @Override

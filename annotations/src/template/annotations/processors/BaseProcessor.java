@@ -33,7 +33,7 @@ import static javax.lang.model.type.TypeKind.*;
  */
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public abstract class BaseProcessor extends AbstractProcessor{
-    public static String packageName = ".gen";
+    public static String generatedPackageName = ".gen";
 
     public JavacElements elements;
     public JavacTrees trees;
@@ -45,6 +45,7 @@ public abstract class BaseProcessor extends AbstractProcessor{
     protected int rounds = 1;
 
     public static String modName;
+    public static String sanitizedModName;
     public static String classPrefix;
 
     static{
@@ -65,10 +66,11 @@ public abstract class BaseProcessor extends AbstractProcessor{
 
         JavacProcessingEnvironment javacProcessingEnv = (JavacProcessingEnvironment)processingEnv;
 
-        this.modName = processingEnv.getOptions().get("modName");
-        this.classPrefix = processingEnv.getOptions().get("classPrefix");
+        BaseProcessor.modName = processingEnv.getOptions().get("modName");
+        BaseProcessor.sanitizedModName = BaseProcessor.modName.replaceAll("-", "");
+        BaseProcessor.classPrefix = processingEnv.getOptions().get("classPrefix");
 
-        packageName = modName + ".gen";
+        generatedPackageName = BaseProcessor.sanitizedModName + ".gen";
 
         elements = javacProcessingEnv.getElementUtils();
         trees = JavacTrees.instance(javacProcessingEnv);
@@ -109,12 +111,12 @@ public abstract class BaseProcessor extends AbstractProcessor{
     public abstract void process(RoundEnvironment roundEnv) throws Exception;
 
     public void write(TypeSpec spec) throws Exception{
-        write(spec, null);
+        write(spec, Seq.with());
     }
 
     public void write(TypeSpec spec, Seq<String> imports) throws Exception{
         try{
-            JavaFile file = JavaFile.builder(packageName, spec)
+            JavaFile file = JavaFile.builder(generatedPackageName, spec)
                 .indent("    ")
                 .skipJavaLangImports(true)
                 .build();
@@ -153,8 +155,7 @@ public abstract class BaseProcessor extends AbstractProcessor{
                 stream.close();
             }
         }catch(FilerException e){
-            throw new Exception("Misbehaving files prevent annotation processing from being done. Try running `gradlew clean`");
-        }
+            throw new RuntimeException("FilerException: " + e.getMessage() + ". Misbehaving files might prevent annotation processing. Try running `gradlew clean`.", e);        }
     }
 
     public TypeElement toEl(TypeMirror t){
@@ -184,7 +185,7 @@ public abstract class BaseProcessor extends AbstractProcessor{
     }
 
     public static ClassName cName(String canonical){
-        canonical = canonical.replace("<any?>", modName + ".gen");
+        canonical = canonical.replace("<any?>", sanitizedModName + ".gen");
 
         Matcher matcher = Pattern.compile("\\.[A-Z]").matcher(canonical);
         boolean find = matcher.find();
@@ -196,7 +197,7 @@ public abstract class BaseProcessor extends AbstractProcessor{
         String simpleName = simpleNames.pop();
         simpleNames.reverse();
 
-        return ClassName.get(pkgName.isEmpty() ? packageName : pkgName, simpleName, simpleNames.toArray());
+        return ClassName.get(pkgName.isEmpty() ? generatedPackageName : pkgName, simpleName, simpleNames.toArray());
     }
 
     public static ClassName cName(Element e){

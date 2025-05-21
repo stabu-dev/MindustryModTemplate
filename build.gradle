@@ -113,11 +113,6 @@ allprojects{
 }
 
 import arc.files.Fi
-import arc.util.OS
-
-import java.nio.channels.Channels
-import java.nio.channels.FileChannel
-import java.nio.channels.ReadableByteChannel
 
 tasks.register('install', DefaultTask) {
     final def mainProj = project(':main')

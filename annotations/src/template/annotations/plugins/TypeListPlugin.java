@@ -12,8 +12,7 @@ import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;
 import template.annotations.Annotations.*;
-
-import static template.annotations.processors.BaseProcessor.*;
+import template.annotations.processors.*;
 
 /**
  * Gathers all declared non-anonymous classes and packages and appends them to fields with {@code Seq.<String>with()}
@@ -56,9 +55,9 @@ public class TypeListPlugin implements Plugin{
                                 sym != null &&
                                 !sym.isAnonymous() &&
                                 !(
-                                    sym.getQualifiedName().toString().startsWith(modName + ".entities.comp") ||
-                                    sym.getQualifiedName().toString().startsWith(modName + ".entities.merge") ||
-                                    sym.getQualifiedName().toString().startsWith(modName + ".fetched")
+                                        sym.getQualifiedName().toString().startsWith(BaseProcessor.sanitizedModName + ".entities.comp") ||
+                                        sym.getQualifiedName().toString().startsWith(BaseProcessor.sanitizedModName + ".entities.merge") ||
+                                        sym.getQualifiedName().toString().startsWith(BaseProcessor.sanitizedModName + ".fetched")
                                 )
                             ){
                                 StringBuilder builder = new StringBuilder(sym.getSimpleName().toString());

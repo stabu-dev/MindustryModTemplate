@@ -2,6 +2,9 @@ sourceSets.main{
     java.srcDirs = ['src/']
 }
 
+sourceCompatibility = 17
+targetCompatibility = 17
+
 import arc.files.*
 import arc.func.Func2
 import arc.struct.IntMap
@@ -98,7 +101,7 @@ task proc(dependsOn: [classes, configurations.runtimeClasspath]){
 
         javaexec{
             workingDir = assetsDir
-            main = modName + '.tools.Tools'
+            main = rootProject.ext.modName.replaceAll("-", "") + '.tools.Tools'
             classpath = sourceSets.main.runtimeClasspath
             systemProperty 'currentModName', modName
         }

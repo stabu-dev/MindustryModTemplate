@@ -132,7 +132,7 @@ public class EntityIO{
     }
 
     public void io(BaseProcessor proc, String type, String field){
-        type = type.replace("mindustry.gen.", "").replace(modName + ".gen.", "");
+        type = type.replace("mindustry.gen.", "").replace(BaseProcessor.sanitizedModName + ".gen.", "");
 
         if(BaseProcessor.isPrimitive(type)){
             s(type.equals("boolean") ? "bool" : type.charAt(0) + "", field);

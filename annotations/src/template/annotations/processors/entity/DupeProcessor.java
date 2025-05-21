@@ -40,12 +40,11 @@ public class DupeProcessor extends BaseProcessor{
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {
-        Set<String> types = new HashSet<>();
-        String prefix = processingEnv.getOptions().get("modName") + ".annotations.Annotations.";
-        types.add(prefix + "Dupe");
-        types.add(prefix + "DupeComponent");
-        types.add(prefix + "DupeInterface");
-        return types;
+        return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+                Dupe.class.getCanonicalName(),
+                DupeComponent.class.getCanonicalName(),
+                DupeInterface.class.getCanonicalName()
+        )));
     }
 
     @Override
@@ -285,7 +284,7 @@ public class DupeProcessor extends BaseProcessor{
             builder.addMethod(mbuilder.build());
         }
 
-        return new DupeDefinition(packageName + "." + name, builder, def, allFieldSpecs, simpleName(baseClass));
+        return new DupeDefinition(generatedPackageName + "." + name, builder, def, allFieldSpecs, simpleName(baseClass));
     }
 
     boolean processDefinition(DupeDefinition def){
@@ -326,7 +325,7 @@ public class DupeProcessor extends BaseProcessor{
 
     TypeName procName(TypeElement comp, Func<TypeElement, String> name){
         return ClassName.get(
-                comp.getEnclosingElement().toString().contains("fetched") ? "mindustry.gen" : packageName,
+                comp.getEnclosingElement().toString().contains("fetched") ? "mindustry.gen" : generatedPackageName,
                 name.get(comp)
         );
     }

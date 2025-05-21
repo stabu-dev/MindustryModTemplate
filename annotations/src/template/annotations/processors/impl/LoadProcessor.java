@@ -11,12 +11,12 @@ import template.annotations.processors.*;
 import javax.annotation.processing.*;
 import javax.lang.model.element.*;
 import java.lang.annotation.*;
+import java.util.*;
 import java.util.HashSet;
 import java.util.Set;
 
 /** @author GlennFolker */
 @SupportedOptions({"modName"})
-
 public class LoadProcessor extends BaseProcessor{
     {
         rounds = 1;
@@ -24,10 +24,9 @@ public class LoadProcessor extends BaseProcessor{
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {
-        Set<String> types = new HashSet<>();
-        String prefix = processingEnv.getOptions().get("modName") + ".annotations.Annotations.";
-        types.add(prefix + "LoadRegs");
-        return types;
+        return Collections.unmodifiableSet(new HashSet<>(Collections.singletonList(
+                LoadRegs.class.getCanonicalName()
+        )));
     }
 
     @Override
@@ -91,7 +90,7 @@ public class LoadProcessor extends BaseProcessor{
                                 Modifier.PUBLIC, Modifier.STATIC
                             )
                                 .addAnnotation(
-                                    AnnotationSpec.builder(ClassName.get(packageName, "Regions", outline.name))
+                                    AnnotationSpec.builder(ClassName.get(generatedPackageName, "Regions", outline.name))
                                         .addMember("color", "$S", ann.outlineColor())
                                         .addMember("radius", "$L", ann.outlineRadius())
                                         .build()

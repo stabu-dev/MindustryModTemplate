@@ -42,12 +42,11 @@ public class MergeProcessor extends BaseProcessor{
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {
-        Set<String> types = new HashSet<>();
-        String prefix = processingEnv.getOptions().get("modName") + ".annotations.Annotations.";
-        types.add(prefix + "Merge");
-        types.add(prefix + "MergeComponent");
-        types.add(prefix + "MergeInterface");
-        return types;
+        return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+                Merge.class.getCanonicalName(),
+                MergeComponent.class.getCanonicalName(),
+                MergeInterface.class.getCanonicalName()
+        )));
     }
 
     @Override
@@ -470,7 +469,7 @@ public class MergeProcessor extends BaseProcessor{
             builder.addMethod(mbuilder.build());
         }
 
-        return new MergeDefinition(packageName + "." + name, builder, def, defComps, allFieldSpecs);
+        return new MergeDefinition(generatedPackageName + "." + name, builder, def, defComps, allFieldSpecs);
     }
 
     boolean processDefinition(MergeDefinition def){
@@ -543,7 +542,7 @@ public class MergeProcessor extends BaseProcessor{
 
     TypeName procName(TypeElement comp, Func<TypeElement, String> name){
         return ClassName.get(
-            comp.getEnclosingElement().toString().contains("fetched") ? "mindustry.gen" : packageName,
+            comp.getEnclosingElement().toString().contains("fetched") ? "mindustry.gen" : generatedPackageName,
             name.get(comp)
         );
     }

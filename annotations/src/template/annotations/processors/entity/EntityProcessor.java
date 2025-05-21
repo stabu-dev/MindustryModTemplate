@@ -54,13 +54,12 @@ public class EntityProcessor extends BaseProcessor{
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {
-        Set<String> types = new HashSet<>();
-        String prefix = processingEnv.getOptions().get("modName") + ".annotations.Annotations.";
-        types.add(prefix + "EntityComponent");
-        types.add(prefix + "EntityBaseComponent");
-        types.add(prefix + "EntityDef");
-        types.add(prefix + "EntityPoint");
-        return types;
+        return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+                EntityComponent.class.getCanonicalName(),
+                EntityBaseComponent.class.getCanonicalName(),
+                EntityDef.class.getCanonicalName(),
+                EntityPoint.class.getCanonicalName()
+        )));
     }
 
     @Override
@@ -643,12 +642,12 @@ public class EntityProcessor extends BaseProcessor{
 
                 builder.addMethod(
                     MethodSpec.methodBuilder("create").addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                        .returns(ClassName.get(packageName, name))
+                        .returns(ClassName.get(generatedPackageName, name))
                         .addStatement(ann.pooled() ? "return arc.util.pooling.Pools.obtain($L.class, " + name + "::new)" : "return new $L()", name)
                     .build()
                 );
 
-                definitions.add(new EntityDefinition(packageName + "." + name, builder, def, typeIsBase ? null : baseClass, defComps, defGroups, allFieldSpecs));
+                definitions.add(new EntityDefinition(generatedPackageName + "." + name, builder, def, typeIsBase ? null : baseClass, defComps, defGroups, allFieldSpecs));
             }
         }else if(round == 3){
             TypeSpec.Builder map = TypeSpec.classBuilder(classPrefix + "EntityMapping").addModifiers(Modifier.PUBLIC)
@@ -683,7 +682,7 @@ public class EntityProcessor extends BaseProcessor{
                             ParameterizedTypeName.get(cName(Prov.class), tvName("T")),
                             "prov"
                         )
-                        .beginControlFlow("synchronized($T.class)", ClassName.get(packageName, classPrefix + "EntityMapping"))
+                        .beginControlFlow("synchronized($T.class)", ClassName.get(generatedPackageName, classPrefix + "EntityMapping"))
                             .addStatement("if(ids.containsKey(type) || $T.nameMap.containsKey(type.getSimpleName())) return", cName(EntityMapping.class))
                             .addCode(lnew())
                             .beginControlFlow("for(; last < $T.idMap.length; last++)", cName(EntityMapping.class))
@@ -759,13 +758,13 @@ public class EntityProcessor extends BaseProcessor{
                 .returns(TypeName.VOID);
 
             for(EntityDefinition def : definitions){
-                ClassName type = ClassName.get(packageName, def.name);
+                ClassName type = ClassName.get(generatedPackageName, def.name);
 
                 def.builder.addMethod(
                     MethodSpec.methodBuilder("classId").addModifiers(Modifier.PUBLIC)
                         .addAnnotation(cName(Override.class))
                         .returns(TypeName.INT)
-                        .addStatement("return $T.classId($T.class)", ClassName.get(packageName, classPrefix + "EntityMapping"), type)
+                        .addStatement("return $T.classId($T.class)", ClassName.get(generatedPackageName, classPrefix + "EntityMapping"), type)
                     .build()
                 );
 
@@ -827,7 +826,7 @@ public class EntityProcessor extends BaseProcessor{
                     TypeElement superclassVanilla = null;
 
                     if(def.extend != null){
-                        superclass = baseClasses.find(b -> (packageName + "." + Reflect.get(b, "name")).equals(def.extend.toString()));
+                        superclass = baseClasses.find(b -> (generatedPackageName + "." + Reflect.get(b, "name")).equals(def.extend.toString()));
                         if(superclass == null){
                             superclassVanilla = elements.getTypeElement(def.extend.toString());
                         }
@@ -1088,7 +1087,7 @@ public class EntityProcessor extends BaseProcessor{
 
     TypeName procName(TypeElement comp, Func<TypeElement, String> name){
         return ClassName.get(
-            comp.getEnclosingElement().toString().contains("fetched") ? "mindustry.gen" : packageName,
+            comp.getEnclosingElement().toString().contains("fetched") ? "mindustry.gen" : generatedPackageName,
             name.get(comp)
         );
     }
