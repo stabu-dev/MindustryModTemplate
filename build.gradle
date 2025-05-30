@@ -110,6 +110,13 @@ allprojects{
         options.addStringOption('Xdoclint:none', '-quiet')
         options.addStringOption('-release', '17')
     }
+
+    // Skip javadoc task for annotations project
+    project(':annotations') {
+        tasks.withType(Javadoc) {
+            enabled = false
+        }
+    }
 }
 
 import arc.files.Fi

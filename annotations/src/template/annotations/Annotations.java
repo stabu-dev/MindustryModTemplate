@@ -136,15 +136,6 @@ public class Annotations{
     @Retention(RetentionPolicy.SOURCE)
     public @interface EntityInterface{}
 
-    /** Fills a {@code Seq.<String>with()}'s arg with the list of compiled classes with their qualified names. */
-    @Target({ElementType.FIELD, ElementType.LOCAL_VARIABLE})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface ListClasses{}
-
-    /** Fills a {@code Seq.<String>with()}'s arg with the list of compiled packages. */
-    @Target({ElementType.FIELD, ElementType.LOCAL_VARIABLE})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface ListPackages{}
 
     /** Prevents this component from getting added into an entity group, specified by the group's element type */
     @Target(ElementType.TYPE)
