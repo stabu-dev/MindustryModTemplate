@@ -54,7 +54,7 @@ Before diving in, a good understanding of Java and Git is **highly recommended**
 
     ```mermaid
     ---
-    title: Project Hierarchy (Example: name="my-awesome-mod", sanitized package="myawesomemod")
+    title: Project Hierarchy Example name my-awesome-mod sanitized package myawesomemod
     ---
     graph LR;
     %%{init:{'flowchart':{'nodeSpacing': 10, 'rankSpacing': 10}}}%%;
