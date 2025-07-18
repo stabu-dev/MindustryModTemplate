@@ -14,6 +14,7 @@ import mindustry.ctype.*;
 import mindustry.mod.*;
 import mindustry.mod.Mods.*;
 import template.*;
+import template.gen.*;
 import template.tools.GenAtlas.*;
 
 import java.nio.file.*;
@@ -128,7 +129,10 @@ public final class Tools{
     public static boolean load(Content content){
         synchronized(loaded){
             boolean should = loaded[content.getContentType().ordinal()].add(content.id);
-            if(should) content.load();
+            if(should){
+                content.load();
+                if (content instanceof MappableContent c) TemplateContentRegionRegistry.load(c);
+            }
 
             return should;
         }

@@ -84,8 +84,8 @@ public abstract class BaseProcessor extends AbstractProcessor{
         if(rootDir == null){
             try{
                 String path = Fi.get(filer.getResource(StandardLocation.CLASS_OUTPUT, "no", "no")
-                    .toUri().toURL().toString().substring(OS.isWindows ? 6 : "file:".length()))
-                    .parent().parent().parent().parent().parent().parent().parent().toString().replace("%20", " ");
+                .toUri().toURL().toString().substring(OS.isWindows ? 6 : "file:".length()))
+                .parent().parent().parent().parent().parent().parent().parent().toString().replace("%20", " ");
 
                 rootDir = Fi.get(path);
             }catch(IOException e){
