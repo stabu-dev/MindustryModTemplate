@@ -165,7 +165,7 @@ Before diving in, a good understanding of Java and Git is **highly recommended**
 ## Building the Mod
 
 Mindustry Java mods are typically cross-platform. Builds are managed via Gradle.
-This template uses Jabel to allow you to write modern Java syntax (e.g., Java 17 features) in your `main` module, which is then compiled down to Java 8 compatible bytecode. This ensures your mod can run on Mindustry instances using Java 8.
+This template uses Jabel to allow you to write modern Java syntax (e.g., Java 17 features) in your `main` module, which is then compiled down to Java 8 compatible bytecode. This ensures your mod can run on Mindustry instances using Java 8. All modules in this template are standardized to use Java 17.
 
 ### Desktop Build (PC)
 
@@ -243,11 +243,9 @@ This produces a JAR compatible with both Android and PC (e.g., `MyAwesomeMod.jar
             *   **Note:** When launching the non-Steam client JAR this way, Mindustry's console output will be displayed directly in your IDE/terminal. This is not possible with the Steam version due to how Steam launches applications.
     *   Sets `MINDUSTRY_DATA_DIR` to the appropriate data/saves directory and `DEVELOPMENT=true` environment variables for the game instance.
 *   `tools:proc`: Runs the asset processing pipeline (defined in the `tools` module), processing files from `main/assets-raw/` to `main/assets/`.
-*   `main:fetchComps`: Downloads and adapts Mindustry's core entity components into a temporary build directory for compilation. The fetched components are placed in a package derived from your sanitized `mod.json` `name` (e.g., `myawesomemod/fetched/`).
+*   `main:fetchComps`: Downloads and adapts Mindustry's core entity components into a temporary build directory for compilation. This task is automatically run before compilation.
 *   `updateBundles`: Synchronizes localization files in `main/assets/bundles/` based on `bundle.properties`. Changes are automatically committed and pushed by the CI workflow if changes are detected.
 *   `clean`: Deletes all `build` directories across all modules.
-*   `cleanFetched`: Deletes only the fetched vanilla components from the temporary build directory and the `fetch.txt` marker.
-*   `tools:rearchive`: If `tools:proc` is run and only assets change, this task (if `toolRearchive` property is true, which it is by default) updates your existing built JARs (from `main:deploy` and `main:dex`) with the new assets without fully recompiling the `main` module's Java code.
 
 ## Adding Dependencies
 
