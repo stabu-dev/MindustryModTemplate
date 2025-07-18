@@ -1,4 +1,6 @@
-# MindustryModTemplate
+<p align="center">
+  <img src="main/assets-raw/sprites/img.png" alt="img.png" />
+</p>
 
 An advanced Java mod template for [Mindustry](https://github.com/Anuken/Mindustry), designed for experienced modders. It features a robust annotation-driven code generation system, an automated asset processing pipeline, GitHub Actions CI for cross-platform builds, and Jabel integration for modern Java syntax with Java 8 bytecode compatibility.
 
@@ -13,7 +15,7 @@ Before diving in, a good understanding of Java and Git is **highly recommended**
     *   **IDE (Recommended):** [IntelliJ IDEA](https://www.jetbrains.com/idea/download/) (Community Edition is free) is strongly suggested over basic text editors.
 2.  **Create Your Repository:**
     *   Click the `Use this template` button on the [GitHub repository page](https://github.com/stabu-dev/MindustryModTemplate) (or your fork).
-    *   Select "Create a new repository".
+    *   Select "Create a new repository."
 3.  **Clone Your Repository:**
     *   Clone the newly created repository to your local machine.
 
