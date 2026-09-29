@@ -32,53 +32,54 @@ tasks.register('proc', JavaExec){
 }
 
 tasks.register('updateBundles'){
+    def targetBundle = findProperty('bundle')
     doLast{
         def uniEscape = { String s ->
-            s.collect{ char c ->
-                (c > 61 && c < 127) ? (c == '\\' as char ? "\\\\" : c) :
-                (c >= 0xE000 && c <= 0xF8FF) ? String.format("\\u%04x", (int) c) : c
+            s.collect{ c ->
+                int code = c.codePointAt(0)
+                (code > 61 && code < 127) ? (c == '\\' ? "\\\\" : c) :
+                (code >= 0xE000 && code <= 0xF8FF) ? String.format("\\u%04x", code) : c
             }.join()
         }
 
-        File bundlesDir = file("${rootProject.ext.assetsDir}/bundles")
-        File baseBundleFile = file("$bundlesDir/bundle.properties")
+        File bundlesDir = file("../main/assets/bundles")
+        File baseBundleFile = new File(bundlesDir, "bundle.properties")
         if(!baseBundleFile.exists()) return
 
         OrderedMap<String, String> base = new OrderedMap<>()
-        PropertiesUtils.load(base, Fi.get(baseBundleFile.path).reader())
+        PropertiesUtils.load(base, Fi.get(baseBundleFile.absolutePath).reader())
 
         IntMap<String> comments = new IntMap<>()
-        def lines = Fi.get(baseBundleFile.path).reader().readLines()
+        def lines = Fi.get(baseBundleFile.absolutePath).reader().readLines()
         int offset = 0
-        for(int i = 0; i < lines.size(); i++){
-            def line = lines.get(i)
-            if(i > 0 && lines.get(i - 1).endsWith("\\")) offset++
+        lines.eachWithIndex{ line, i ->
+            if(i > 0 && lines[i - 1].endsWith("\\")) offset++
             else if(line.isEmpty() || line.startsWith("#")) comments.put(i - offset, line)
         }
 
-        Fi.get(bundlesDir.path).walk{ child ->
-            if(child.name() == "bundle.properties" || child.toString().contains("output")) return
-            if(project.hasProperty("bundle") && child.name() != project.property("bundle")) return
+        Fi.get(bundlesDir.absolutePath).walk{ child ->
+            if(child.name() == "bundle.properties" || child.path().contains("output")) return
+            if(targetBundle && child.name() != targetBundle) return
 
             OrderedMap<String, String> other = new OrderedMap<>()
             PropertiesUtils.load(other, child.reader())
 
-            for(String key : other.orderedKeys().toSeq()){
+            for(String key : Seq.with(other.orderedKeys())){
                 if(!base.containsKey(key)) other.remove(key)
             }
             for(String key : base.orderedKeys()){
-                if(other.get(key) == null || other.get(key).trim().isEmpty()) other.put(key, base.get(key))
+                if(!other.get(key)?.trim()) other.put(key, base.get(key))
             }
 
-            StringBuilder result = new StringBuilder()
+            StringBuilder res = new StringBuilder()
             int i = 0
             for(String key : base.orderedKeys()){
-                while(comments.containsKey(i++)) result.append(comments.get(i - 1)).append('\n')
+                while(comments.containsKey(i++)) res.append(comments.get(i - 1)).append('\n')
                 if(other.get(key) == null) continue
                 def v = other.get(key)
-                result.append(key).append(" =").append(v.trim().isEmpty() ? "" : " ").append(uniEscape(v).replace("\n", "\\n")).append('\n')
+                res.append(key).append(" =").append(v.trim() ? " " : "").append(uniEscape(v).replace("\n", "\\n")).append('\n')
             }
-            child.writeString(result.toString())
+            child.writeString(res.toString())
         }
     }
 }
