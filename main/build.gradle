@@ -22,7 +22,7 @@ tasks.register('deploy', Jar){
 
     from sourceSets.main.output
     from configurations.runtimeClasspath.collect{ it.isDirectory() ? it : zipTree(it) }
-    from(rootProject.ext.assetsDir){ exclude 'sprites/vanilla/**' }
+    from(rootProject.ext.assetsDir){ exclude 'sprites/vanilla/**', '**/*.class' }
     from(rootDir){ include 'mod.json', 'icon.png' }
 }
 
