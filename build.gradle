@@ -31,8 +31,8 @@ allprojects{
     version = rootProject.ext.modVersion
 
     ext{
-        def localProp = new File(rootDir, 'local.properties')
-        sdkRoot = System.getenv('ANDROID_HOME') ?: System.getenv('ANDROID_SDK_ROOT') ?: (localProp.exists() ? new Properties().tap{ load(localProp.newInputStream()) }.getProperty('sdk.dir') : null)
+        def localProp = file('local.properties')
+        sdkRoot = System.getenv('ANDROID_HOME') ?: (localProp.exists() ? new Properties().tap{ load(localProp.newInputStream()) }.getProperty('sdk.dir') : null)
         assetsDir = project(':main').file('assets')
     }
 
