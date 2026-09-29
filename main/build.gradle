@@ -36,15 +36,24 @@ tasks.register('dex', Jar){
         def sdk = rootProject.ext.sdkRoot
         if(!sdk || !file(sdk).exists()) throw new GradleException("No Android SDK found. Set ANDROID_HOME or sdk.dir in local.properties.")
 
-        def d8 = fileTree("$sdk/build-tools").matching{ include '**/d8*' }.files.sort().reverse().find()?.path ?: 'd8'
+        def d8 = fileTree("$sdk/build-tools").matching{
+            include(OS.isWindows ? '**/d8.bat' : '**/d8')
+            exclude '**/*.jar'
+        }.files.sort().reverse().find()?.path ?: 'd8'
+
+        if(file(d8).exists()) file(d8).setExecutable(true)
+        temporaryDir.mkdirs()
         def dexJar = file("$temporaryDir/Dexed.jar")
+        delete dexJar
         def cmd = [d8, '--min-api', sdkAPI, '--output', dexJar.path, deploy.archiveFile.get().asFile.path, '--lib', "$sdk/platforms/android-$sdkVersion/android.jar"]
         (configurations.compileClasspath + configurations.runtimeClasspath).each{ cmd += ['--classpath', it.path] }
 
-        if(OS.isWindows && !d8.endsWith('.bat') && !d8.endsWith('.exe')) cmd = ['cmd', '/c'] + cmd
-        def p = cmd.execute(null, temporaryDir)
-        p.waitForProcessOutput(System.out, System.err)
-        if(p.exitValue() != 0) throw new GradleException("d8 failed with code ${p.exitValue()}")
+        if(OS.isWindows) cmd = ['cmd', '/c'] + cmd
+        def p = new ProcessBuilder(cmd.collect{ it.toString() })
+            .directory(temporaryDir)
+            .inheritIO()
+            .start()
+        if(p.waitFor() != 0) throw new GradleException("d8 failed with code ${p.exitValue()}")
     }
 
     from zipTree(deploy.archiveFile)
